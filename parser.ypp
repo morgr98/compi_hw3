@@ -72,12 +72,15 @@ Exp : LPAREN Exp RPAREN
     | Exp MULT_DIV Exp
     | ID
     | Call
-    | NUM
-    | NUM B
-    | STRING
-    | TRUE
-    | FALSE
-    | NOT Exp
+    | NUM {$$ = new Exp(Int_t);}
+    | NUM B {$$ = new Exp(Byte_t);}
+    | STRING {$$ = new Exp(String_t);}
+    | TRUE {$$ = new Exp(Bool_t);}
+    | FALSE {$$ = new Exp(Bool_t);}
+    | NOT Exp {if (checkBoolExp($1))
+                    $$ = new Exp(Bool_t)
+                else
+                    errorMismatch(yylineno);}
     | Exp AND Exp {if (CheckBoolExp($1, $3))
                         $$ = new Exp(Bool_t);
                    else
