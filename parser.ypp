@@ -1,5 +1,6 @@
 %{
 #include "output.hpp"
+#include "Stypes.h"
 #include <iostream>
 #include <stdlib.h>
 extern int yylex();
@@ -66,22 +67,28 @@ Type : INT
 Type : BYTE
 Type : BOOL
 Exp : LPAREN Exp RPAREN
-Exp : Exp IF LPAREN Exp RPAREN ELSE Exp
-Exp : Exp PLUS_MINUS Exp
-Exp : Exp MULT_DIV Exp
-Exp : ID
-Exp : Call
-Exp : NUM
-Exp : NUM B
-Exp : STRING
-Exp : TRUE
-Exp : FALSE
-Exp : NOT Exp
-Exp : Exp AND Exp
-Exp : Exp OR Exp
-Exp : Exp RELOP Exp
-Exp : Exp EQUAL_RELOP Exp
-Exp : LPAREN Type RPAREN Exp
+    | Exp IF LPAREN Exp RPAREN ELSE Exp
+    | Exp PLUS_MINUS Exp
+    | Exp MULT_DIV Exp
+    | ID
+    | Call
+    | NUM
+    | NUM B
+    | STRING
+    | TRUE
+    | FALSE
+    | NOT Exp
+    | Exp AND Exp {if (CheckBoolExp($1, $3))
+                        $$ = new Exp(Bool_t);
+                   else
+                        errorMismatch(yylineno);}
+    | Exp OR Exp {if (CheckBoolExp($1, $3))
+                        $$ = new Exp(Bool_t);
+                  else
+                        errorMismatch(yylineno);}
+    | Exp RELOP Exp
+    | Exp EQUAL_RELOP Exp
+    | LPAREN Type RPAREN Exp
 %%
 int main()
 {
