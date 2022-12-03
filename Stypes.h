@@ -21,14 +21,14 @@ enum type_enum {
 
 class Node {
 public:
-     ~Node() = default;
+     virtual ~Node() {};
 };
 
 class Type_c : public Node {
 public:
     type_enum type;
 
-    Type_c(type_enum type);
+    Type_c(type_enum type) : type(type) {};
 };
 
 class Call_c : public Node {
@@ -83,6 +83,7 @@ public:
 
 bool checkBoolExp(Exp_c& exp);
 bool checkBoolExp(Exp_c& exp1, Exp_c& exp2);
+bool checkTypeExp(Type_c& type, Exp_c& exp);
 
 
 

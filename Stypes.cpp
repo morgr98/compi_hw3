@@ -11,4 +11,8 @@ bool checkBoolExp(Exp_c& exp1, Exp_c& exp2)
 {
     return exp1.type==Bool_t && exp2.type == Bool_t;
 }
+bool checkTypeExp(Type_c& type, Exp_c& exp)
+{
+    return type.type==exp.type;
+}
 

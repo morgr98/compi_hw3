@@ -44,7 +44,9 @@ Formals : /* Epsilon */
         | FormalsList
 FormalsList : FormalDecl
         | FormalDecl COMMA FormalsList
-FormalDecl : Type ID
+FormalDecl : Type ID    {Type_c* type = (Type_c*)&$1;
+                        Exp_c* exp = (Exp_c*)&$1;
+                        }
 Statements : Statement
             | Statements Statement
 Statement : LBRACE Statements RBRACE
@@ -63,9 +65,9 @@ Call : ID LPAREN ExpList RPAREN
     | ID LPAREN RPAREN
 ExpList : Exp
         | Exp COMMA ExpList
-Type : INT
-        | BYTE
-        | BOOL
+Type : INT  {$$ = new Type_c(Int_t);}
+        | BYTE {$$ = new Type_c(Byte_t);}
+        | BOOL {$$ = new Type_c(Bool_t);}
 Exp : LPAREN Exp RPAREN
     | Exp IF LPAREN Exp RPAREN ELSE Exp
     | Exp PLUS_MINUS Exp
@@ -80,15 +82,18 @@ Exp : LPAREN Exp RPAREN
     | NOT Exp {if (checkBoolExp(*(Exp_c*)&$1))
                     $$ = new Exp_c(Bool_t);
                 else
-                    errorMismatch(yylineno);}
-    | Exp AND Exp {if (checkBoolExp(*(Exp_c*)&$1, *(Exp_c*)&$3))
+                    errorMismatch(yylineno);
+                    exit(1);}
+    | Exp AND Exp {if (checkBoolExp(*(Exp_c*)$1, *(Exp_c*)$3))
                         $$ = new Exp_c(Bool_t);
                    else
-                        errorMismatch(yylineno);}
-    | Exp OR Exp {if (checkBoolExp(*(Exp_c*)&$1, *(Exp_c*)&$3))
+                        errorMismatch(yylineno);
+                        exit(1);}
+    | Exp OR Exp {if (checkBoolExp(*(Exp_c*)$1, *(Exp_c*)$3))
                         $$ = new Exp_c(Bool_t);
                   else
-                        errorMismatch(yylineno);}
+                        errorMismatch(yylineno);
+                        exit(1);}
     | Exp RELOP Exp
     | Exp EQUAL_RELOP Exp
     | LPAREN Type RPAREN Exp
