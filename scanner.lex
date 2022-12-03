@@ -75,7 +75,7 @@ b return  B;
 {plus_minus} return PLUS_MINUS;
 {mult_div} return MULT_DIV;
 {num} return NUM;
-{id} return ID;
+{id} {ID_c *id = new ID_c(yytext); return ID;}
 {string} return STRING;
 {comment}
 {whitespace}
