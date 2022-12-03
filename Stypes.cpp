@@ -4,7 +4,7 @@
 
 #include "Stypes.h"
 
-bool checkBoolExp(Exp& exp){
+bool checkBoolExp(Exp_c& exp){
     return exp.type==Bool_t;
 }
 bool checkBoolExp(Exp& exp1, Exp& exp2)

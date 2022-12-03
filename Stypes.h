@@ -5,6 +5,8 @@
 #ifndef COMPI_HW3_STYPES_H
 #define COMPI_HW3_STYPES_H
 
+#include <iostream>
+
 #define YYSTYPE Node*
 
 enum type_enum {
@@ -19,57 +21,57 @@ class Node {
 
 };
 
-class Type : public Node {
+class Type_c : public Node {
     type_enum type;
 
-    Type(type_enum type);
+    Type_c(type_enum type);
 };
 
-class Call : public Node {
+class Call_c : public Node {
     type_enum type;
 
-    Call(type_enum type);
+    Call_c(type_enum type);
 };
 
-class Exp : public Node {
+class Exp_c : public Node {
     type_enum type;
 
-    Exp(type_enum type);
+    Exp_c(type_enum type);
 };
 
-class ExpList : public Node {
-    std::vecotr<Exp> expressions;
+class ExpList_c : public Node {
+    std::vector<Exp_c> expressions;
 
-    ExpList(const std::vector<Exp>& expressions);
+    ExpList_c(const std::vector<Exp_c>& expressions);
 }
 
-class FormalDecl : public Node {
+class FormalDecl_c : public Node {
     type_enum type;
     const string id;
 
-    FormalDecl(type_enum type, const string& id);
+    FormalDecl_c(type_enum type, const string& id);
 };
 
-class FormalsList: public Node {
-    std::vector<FormalDecl> decls;
+class FormalsList_c: public Node {
+    std::vector<FormalDecl_c> decls;
 
-    FormalsList(const std::vector<FormalDecl>& decls);
+    FormalsList_c(const std::vector<FormalDecl>& decls);
 };
 
-class Formals : public Node {
-    std::vector<FromalDecl> decls;
-    Formals(const std::vector<FormalDecl>& decls);
+class Formals_c : public Node {
+    std::vector<FromalDecl_c> decls;
+    Formals_c(const std::vector<FormalDecl>& decls);
 
 };
 
-class RetType : public Node {
+class RetType_c : public Node {
     type_enum type;
 
-    RetType(type_enum type);
+    RetType_c(type_enum type);
 };
 
-bool checkBoolExp(Exp& exp);
-bool checkBoolExp(Exp& exp1, Exp& exp2);
+bool checkBoolExp(Exp_c& exp);
+bool checkBoolExp(Exp_c& exp1, Exp_c& exp2);
 
 
 
