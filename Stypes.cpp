@@ -7,7 +7,8 @@
 bool checkBoolExp(Exp_c& exp){
     return exp.type==Bool_t;
 }
-bool checkBoolExp(Exp& exp1, Exp& exp2)
+bool checkBoolExp(Exp_c& exp1, Exp_c& exp2)
 {
-    return exp.type==Bool_t && exp2.type == Bool_t;
+    return exp1.type==Bool_t && exp2.type == Bool_t;
 }
+

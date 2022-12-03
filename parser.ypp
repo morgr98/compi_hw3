@@ -70,22 +70,22 @@ Exp : LPAREN Exp RPAREN
     | Exp IF LPAREN Exp RPAREN ELSE Exp
     | Exp PLUS_MINUS Exp
     | Exp MULT_DIV Exp
-    | ID {$$ = new Exp_c(NONE_t)}
+    | ID {$$ = new Exp_c(NONE_t);}
     | Call
     | NUM {$$ = new Exp_c(Int_t);}
     | NUM B {$$ = new Exp_c(Byte_t);}
     | STRING {$$ = new Exp_c(String_t);}
     | TRUE {$$ = new Exp_c(Bool_t);}
     | FALSE {$$ = new Exp_c(Bool_t);}
-    | NOT Exp {if (checkBoolExp((Exp_c)$1))
-                    $$ = new Exp_c(Bool_t)
+    | NOT Exp {if (checkBoolExp(*(Exp_c*)&$1))
+                    $$ = new Exp_c(Bool_t);
                 else
                     errorMismatch(yylineno);}
-    | Exp AND Exp {if (CheckBoolExp((Exp_c)$1, (Exp_c)$3))
+    | Exp AND Exp {if (checkBoolExp(*(Exp_c*)&$1, *(Exp_c*)&$3))
                         $$ = new Exp_c(Bool_t);
                    else
                         errorMismatch(yylineno);}
-    | Exp OR Exp {if (CheckBoolExp((Exp_c)$1, (Exp_c)$3))
+    | Exp OR Exp {if (checkBoolExp(*(Exp_c*)&$1, *(Exp_c*)&$3))
                         $$ = new Exp_c(Bool_t);
                   else
                         errorMismatch(yylineno);}

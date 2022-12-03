@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <vector>
-
+#include "string"
 #define YYSTYPE Node*
 
 enum type_enum {
@@ -21,7 +21,7 @@ enum type_enum {
 
 class Node {
 public:
-    virtual ~Node() = 0;
+     ~Node() = default;
 };
 
 class Type_c : public Node {
@@ -41,8 +41,8 @@ public:
 class Exp_c : public Node {
 public:
     type_enum type;
-
-    Exp_c(type_enum type);
+    Exp_c(type_enum type) : type(type){}
+    
 };
 
 class ExpList_c : public Node {
@@ -55,9 +55,9 @@ public:
 class FormalDecl_c : public Node {
 public:
     type_enum type;
-    const string id;
+    const std::string id;
 
-    FormalDecl_c(type_enum type, const string& id);
+    FormalDecl_c(type_enum type, const std::string& id);
 };
 
 class FormalsList_c: public Node {
