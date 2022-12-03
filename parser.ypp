@@ -1,5 +1,5 @@
 %{
-#include "output.hpp"
+#include "hw3_output.hpp"
 #include "Stypes.h"
 #include <iostream>
 #include <stdlib.h>
@@ -36,57 +36,57 @@ int yyerror(const char * message);
 %%
 Program : Funcs
 Funcs : /* Epsilon */
-Funcs : FuncDecl Funcs
+        | FuncDecl Funcs
 FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE
 RetType : Type
-RetType :  VOID
+        |  VOID
 Formals : /* Epsilon */
-Formals : FormalsList
+        | FormalsList
 FormalsList : FormalDecl
-FormalsList : FormalDecl COMMA FormalsList
+        | FormalDecl COMMA FormalsList
 FormalDecl : Type ID
 Statements : Statement
-Statements : Statements Statement
+            | Statements Statement
 Statement : LBRACE Statements RBRACE
-Statement : Type ID SC
-Statement : Type ID ASSIGN Exp SC
-Statement : ID ASSIGN Exp SC
-Statement : Call SC
-Statement : RETURN SC
-Statement : RETURN Exp SC
-Statement : IF LPAREN Exp RPAREN Statement
-Statement : IF LPAREN Exp RPAREN Statement ELSE Statement
-Statement : WHILE LPAREN Exp RPAREN Statement
-Statement : BREAK SC
-Statement : CONTINUE SC
+            | Type ID SC
+            | Type ID ASSIGN Exp SC
+            | ID ASSIGN Exp SC
+            | Call SC
+            | RETURN SC
+            | RETURN Exp SC
+            | IF LPAREN Exp RPAREN Statement
+            | IF LPAREN Exp RPAREN Statement ELSE Statement
+            | WHILE LPAREN Exp RPAREN Statement
+            | BREAK SC
+            | CONTINUE SC
 Call : ID LPAREN ExpList RPAREN
-Call : ID LPAREN RPAREN
+    | ID LPAREN RPAREN
 ExpList : Exp
-ExpList : Exp COMMA ExpList
+        | Exp COMMA ExpList
 Type : INT
-Type : BYTE
-Type : BOOL
+        | BYTE
+        | BOOL
 Exp : LPAREN Exp RPAREN
     | Exp IF LPAREN Exp RPAREN ELSE Exp
     | Exp PLUS_MINUS Exp
     | Exp MULT_DIV Exp
-    | ID
+    | ID {$$ = new Exp_c(NONE_t)}
     | Call
-    | NUM {$$ = new Exp(Int_t);}
-    | NUM B {$$ = new Exp(Byte_t);}
-    | STRING {$$ = new Exp(String_t);}
-    | TRUE {$$ = new Exp(Bool_t);}
-    | FALSE {$$ = new Exp(Bool_t);}
-    | NOT Exp {if (checkBoolExp($1))
-                    $$ = new Exp(Bool_t)
+    | NUM {$$ = new Exp_c(Int_t);}
+    | NUM B {$$ = new Exp_c(Byte_t);}
+    | STRING {$$ = new Exp_c(String_t);}
+    | TRUE {$$ = new Exp_c(Bool_t);}
+    | FALSE {$$ = new Exp_c(Bool_t);}
+    | NOT Exp {if (checkBoolExp((Exp_c)$1))
+                    $$ = new Exp_c(Bool_t)
                 else
                     errorMismatch(yylineno);}
-    | Exp AND Exp {if (CheckBoolExp($1, $3))
-                        $$ = new Exp(Bool_t);
+    | Exp AND Exp {if (CheckBoolExp((Exp_c)$1, (Exp_c)$3))
+                        $$ = new Exp_c(Bool_t);
                    else
                         errorMismatch(yylineno);}
-    | Exp OR Exp {if (CheckBoolExp($1, $3))
-                        $$ = new Exp(Bool_t);
+    | Exp OR Exp {if (CheckBoolExp((Exp_c)$1, (Exp_c)$3))
+                        $$ = new Exp_c(Bool_t);
                   else
                         errorMismatch(yylineno);}
     | Exp RELOP Exp

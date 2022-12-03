@@ -15,37 +15,44 @@ enum type_enum {
     Byte_t,
     String_t,
     Void_t,
+    NONE_t
 };
 
 class Node {
-
+public:
+    virtual ~Node() = 0;
 };
 
 class Type_c : public Node {
+public:
     type_enum type;
 
     Type_c(type_enum type);
 };
 
 class Call_c : public Node {
+public:
     type_enum type;
 
     Call_c(type_enum type);
 };
 
 class Exp_c : public Node {
+public:
     type_enum type;
 
     Exp_c(type_enum type);
 };
 
 class ExpList_c : public Node {
+public:
     std::vector<Exp_c> expressions;
 
     ExpList_c(const std::vector<Exp_c>& expressions);
-}
+};
 
 class FormalDecl_c : public Node {
+public:
     type_enum type;
     const string id;
 
@@ -53,18 +60,21 @@ class FormalDecl_c : public Node {
 };
 
 class FormalsList_c: public Node {
+public:
     std::vector<FormalDecl_c> decls;
 
-    FormalsList_c(const std::vector<FormalDecl>& decls);
+    FormalsList_c(const std::vector<FormalDecl_c>& decls);
 };
 
 class Formals_c : public Node {
-    std::vector<FromalDecl_c> decls;
-    Formals_c(const std::vector<FormalDecl>& decls);
+public:
+    std::vector<FormalDecl_c> decls;
+    Formals_c(const std::vector<FormalDecl_c>& decls);
 
 };
 
 class RetType_c : public Node {
+public:
     type_enum type;
 
     RetType_c(type_enum type);
