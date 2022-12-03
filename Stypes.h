@@ -6,6 +6,7 @@
 #define COMPI_HW3_STYPES_H
 
 #include <iostream>
+#include <vector>
 
 #define YYSTYPE Node*
 
