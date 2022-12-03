@@ -7,39 +7,40 @@
 #include "Stypes.h"
 #include "stack"
 
-class table_entry{
-    private:
+class TableEntry{
+public:
     std::string name;
     type_enum type;
     int offest;
 
-    public:
-    table_entry(std::string name, type_enum type, int offest) :
-    name(name), type(type), offest(offest){};
+    TableEntry(std::string& name, type_enum type, int offest) : name(name), type(type), offest(offest){};
     
 };
 
-class table{
-    public:
-    std::vector<table_entry> table_list;
-    table();
-    void insert(table_entry entry);
+class Table{
+public:
+    std::vector<TableEntry*> entry_list;
+    Table* parent;
+
+    Table(Table* parent) : parent(parent) {};
+    void insert(TableEntry *entry);
     bool contains(std::string name);
 };
 
-class symbol_table{
-
-    std::stack<table> tables;
+class SymbolTable {
+public:
+    std::stack<Table*> tables;
     std::stack<int> offsets;
 
-    symbol_table();
-    table Maketable(table parrent);
-    void insert(table table, std::string, type_enum type, int offest);
-    void push_t(table table);
+    SymbolTable();
+    /* Maketable makes a table which points to it's parent */
+    Table makeTable(Table *parent);
+    void insert(Table *table, std::string& name, type_enum type, int offest);
+    void push_t(Table& table);
     void push_o(int offest);
-    table pop_t();
+    Table pop_t();
     int pop_o();
-    table top_t();
+    Table top_t();
     int top_o();
 
 };
