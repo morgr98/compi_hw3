@@ -14,6 +14,10 @@ bool checkTypeExp(Type_c& type, Exp_c& exp) {
     return type.type==exp.type;
 }
 
+bool checkTypeExpId(ID_c& id, Exp_c& exp) {
+    return id.type==exp.type;
+}
+
 
 
 

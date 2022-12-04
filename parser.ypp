@@ -83,12 +83,27 @@ Statement : LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
                                                 exit(1);
                                         }
                                         if (checkTypeExp(*type, *exp)) {
-
+                                                 errorMismatch(yylineno);
+                                                 exit(1);
                                         }
                                         sym_table->insert(sym_table->tables.top(), id->name, type->type, sym_table->offsets.top() + 1);
+                                        id->type = type->type;
                                         //TODO: need something for the statement?
                                         }
             | ID ASSIGN Exp SC
+            {
+                ID_c* id = (ID_c*)($1);
+                Exp_c* exp = (Exp_c*)$4;
+                if(sym_table->isDec(id->name))
+                {
+                     errorUndef(yylineno, id->name);
+                     exit(1);
+                }
+                 if (checkTypeExpId(*id, *exp)) {
+                     errorMismatch(yylineno);
+                     exit(1);
+                }
+            }
             | Call SC
             | RETURN SC
             | RETURN Exp SC
