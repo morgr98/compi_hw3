@@ -6,13 +6,14 @@
 #include "string"
 #include <stack>
 #include "Stypes.hpp"
+#include "hw3_output.hpp"
 
 class TableEntry{
 public:
     const std::string name;
     type_enum type;
     int offest;
-
+    bool isfunction;
     TableEntry(const std::string& name, type_enum type, int offest) : name(name), type(type), offest(offest){};
     
 };

@@ -18,6 +18,28 @@ bool checkTypeExpId(ID_c& id, Exp_c& exp) {
     return id.type==exp.type;
 }
 
-
-
+std::string typeToString(type_enum type)
+{
+    switch (type)
+    {
+    case Int_t:
+        return "INT";
+        break;
+    case Bool_t:
+        return "BOOL";
+        break;
+    case Byte_t:
+        return "BYTE";
+        break;
+    case String_t:
+        return "STRING";
+        break;;
+    case Void_t:
+        return "VOID";
+        break;
+    default:
+        break;
+    }
+    return "";
+}
 

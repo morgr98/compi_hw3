@@ -31,11 +31,18 @@ public:
     Type_c(type_enum type) : type(type) {};
 };
 
+class RetType_c : public Node {
+public:
+    type_enum type;
+
+    RetType_c(type_enum type) : type(type) {};
+};
+
 class Call_c : public Node {
 public:
     type_enum type;
 
-    Call_c(type_enum type) : type(type) {};
+    Call_c(type_enum type1) : type(type1) {};
 };
 
 class Exp_c : public Node {
@@ -60,6 +67,15 @@ public:
     FormalDecl_c(type_enum type, const std::string& id) : type(type), id(id) {};
 };
 
+class FuncDecl_c : public Node{
+    public:
+    type_enum type;
+    std::vector<FormalDecl_c*> decls;
+    FuncDecl_c(type_enum type , const std::vector<FormalDecl_c*>& decls) : type(type), decls(decls){};
+};
+
+
+
 class FormalsList_c: public Node {
 public:
     std::vector<FormalDecl_c*> decls;
@@ -70,16 +86,11 @@ public:
 class Formals_c : public Node {
 public:
     std::vector<FormalDecl_c*> decls;
+    Formals_c(){};
     Formals_c(const std::vector<FormalDecl_c*>& decls) : decls(decls) {};
-
 };
 
-class RetType_c : public Node {
-public:
-    type_enum type;
 
-    RetType_c(type_enum type) : type(type) {};
-};
 
 class ID_c : public Node {
 public:
@@ -93,7 +104,7 @@ bool checkBoolExp(Exp_c& exp1, Exp_c& exp2);
 bool checkTypeExp(Type_c& type, Exp_c& exp);
 bool checkTypeExpId(ID_c& id, Exp_c& exp);
 bool isDec(ID_c *id);
-
+std::string typeToString(type_enum type);
 
 
 

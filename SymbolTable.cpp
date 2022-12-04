@@ -11,9 +11,20 @@ Table* SymbolTable::newScope() {
 }
 
 void SymbolTable::closeScope() {
+    output::endScope();
+    Table* table_out = this->tables.top();
+    for (std::vector<TableEntry*>::iterator it = table_out->entry_list.begin() ; it != table_out->entry_list.end(); ++it)
+    {
+        if(!(*it)->isfunction){
+            output::printID((*it)->name, (*it)->offest, typeToString((*it)->type));
+        }
+        else{
+            
+        }
+    }
     this->offsets.pop();
-    this->tables.pop();
 }
+
 
 Table* SymbolTable::makeTable(Table* parent) {
     Table *table = new Table(parent);

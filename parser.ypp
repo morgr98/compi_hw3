@@ -42,11 +42,19 @@ SymbolTable *sym_table = new SymbolTable();
 Program : Funcs
 Funcs : /* Epsilon */
         | FuncDecl Funcs
-FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
-RetType : Type
-        |  VOID
+FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE ScopeOpen Statements RBRACE {
+          RetType_c* ret_type =  (RetType_c*)$1;
+          Formals_c* formal = (Formals_c*)$4;
+          $$ = new FuncDecl_c(ret_type->type , formal->decls);
+          sym_table->closeScope();}
+RetType : Type {Type_c* type = (Type_c*)$1;
+                $$ = new RetType_c(type->type);}
+        |  VOID { $$ = new RetType_c(Void_t);}
 Formals : /* Epsilon */
-        | FormalsList
+        {  $$ = new Formals_c();}
+        | FormalsList 
+          {    FormalsList_c* formal_list = (FormalsList_c*)$1;
+                $$ = new Formals_c(formal_list->decls);}
 FormalsList : FormalDecl {FormalDecl_c* formaldecl = (FormalDecl_c*)$1;
                             std::vector<FormalDecl_c*> vec;
                             vec.push_back(formaldecl);
@@ -106,6 +114,9 @@ Statement : LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
             }
             | Call SC
             | RETURN SC
+            {
+
+            }
             | RETURN Exp SC
             | IF ScopeOpen LPAREN Exp RPAREN Statement {sym_table->closeScope();}
             | IF ScopeOpen LPAREN Exp RPAREN Statement ELSE Statement {sym_table->closeScope();}
@@ -119,7 +130,9 @@ ExpList : Exp
 Type : INT  {$$ = new Type_c(Int_t);}
         | BYTE {$$ = new Type_c(Byte_t);}
         | BOOL {$$ = new Type_c(Bool_t);}
-Exp : LPAREN Exp RPAREN
+Exp : LPAREN Exp RPAREN {
+
+        }
     | Exp IF LPAREN Exp RPAREN ELSE Exp
     | Exp PLUS_MINUS Exp
     | Exp MULT_DIV Exp
