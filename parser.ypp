@@ -1,12 +1,17 @@
 %{
 #include "hw3_output.hpp"
-#include "Stypes.h"
+#include "Stypes.hpp"
+#include "SymbolTable.hpp"
 #include <iostream>
 #include <stdlib.h>
 extern int yylex();
 extern int yylineno;
 using namespace output;
+
 int yyerror(const char * message);
+
+SymbolTable *sym_table = new SymbolTable();
+
 %}
 
 %nonassoc ID STRING NUM VOID INT BYTE B BOOL
@@ -37,7 +42,7 @@ int yyerror(const char * message);
 Program : Funcs
 Funcs : /* Epsilon */
         | FuncDecl Funcs
-FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE
+FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
 RetType : Type
         |  VOID
 Formals : /* Epsilon */
@@ -50,20 +55,46 @@ FormalsList : FormalDecl {FormalDecl_c* formaldecl = (FormalDecl_c*)$1;
         | FormalDecl COMMA FormalsList
 FormalDecl : Type ID    {Type_c* type = (Type_c*)$1;
                         ID_c* id = (ID_c*)$2;
+                        if (sym_table->isAlreadyDecInScope(id->name)) {
+                                errorDef(yylineno, id->name);
+                                exit(1);
+                        }
+                        //TODO: not sure if need to add here
+                        sym_table->insert(sym_table->tables.top(), id->name, type->type, sym_table->offsets.top() + 1);
                         FormalDecl_c* formaldecl = new FormalDecl_c(type->type, id->name);
                         $$ = formaldecl;}
 Statements : Statement
             | Statements Statement
-Statement : LBRACE Statements RBRACE
-            | Type ID SC
-            | Type ID ASSIGN Exp SC
+Statement : LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
+            | Type ID SC {Type_c* type = (Type_c*)$1;
+                        ID_c* id = (ID_c*)$2;
+                        if (sym_table->isAlreadyDecInScope(id->name)) {
+                                errorDef(yylineno, id->name);
+                                exit(1);
+                        }
+                        sym_table->insert(sym_table->tables.top(), id->name, type->type, sym_table->offsets.top() + 1);
+                        //TODO: need something for the statement?
+                        }
+            | Type ID ASSIGN Exp SC     {Type_c* type = (Type_c*)$1;
+                                        ID_c* id = (ID_c*)$2;
+                                        Exp_c* exp = (Exp_c*)$4;
+                                        if (sym_table->isAlreadyDecInScope(id->name)) {
+                                                errorDef(yylineno, id->name);
+                                                exit(1);
+                                        }
+                                        if (checkTypeExp(*type, *exp)) {
+
+                                        }
+                                        sym_table->insert(sym_table->tables.top(), id->name, type->type, sym_table->offsets.top() + 1);
+                                        //TODO: need something for the statement?
+                                        }
             | ID ASSIGN Exp SC
             | Call SC
             | RETURN SC
             | RETURN Exp SC
-            | IF LPAREN Exp RPAREN Statement
-            | IF LPAREN Exp RPAREN Statement ELSE Statement
-            | WHILE LPAREN Exp RPAREN Statement
+            | IF ScopeOpen LPAREN Exp RPAREN Statement {sym_table->closeScope();}
+            | IF ScopeOpen LPAREN Exp RPAREN Statement ELSE Statement {sym_table->closeScope();}
+            | WHILE ScopeOpen LPAREN Exp RPAREN Statement {sym_table->closeScope();}
             | BREAK SC
             | CONTINUE SC
 Call : ID LPAREN ExpList RPAREN
@@ -77,7 +108,12 @@ Exp : LPAREN Exp RPAREN
     | Exp IF LPAREN Exp RPAREN ELSE Exp
     | Exp PLUS_MINUS Exp
     | Exp MULT_DIV Exp
-    | ID {$$ = new Exp_c(NONE_t);}
+    | ID        {ID_c* id = (ID_c*)($1);
+                if(sym_table->isDec(id->name)) {
+                        errorUndef(yylineno, id->name);
+                        exit(1);
+                }
+                $$ = new Exp_c(NONE_t);}
     | Call
     | NUM {$$ = new Exp_c(Int_t);}
     | NUM B {$$ = new Exp_c(Byte_t);}
@@ -102,6 +138,7 @@ Exp : LPAREN Exp RPAREN
     | Exp RELOP Exp
     | Exp EQUAL_RELOP Exp
     | LPAREN Type RPAREN Exp
+ScopeOpen : /* Epsilon */ {sym_table->newScope();}
 %%
 int main()
 {

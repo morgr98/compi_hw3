@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "parser.tab.hpp"
 #include "hw3_output.hpp"
-#include "Stypes.h"
+#include "Stypes.hpp"
 using namespace output;
 
 %}
