@@ -45,7 +45,10 @@ Funcs : /* Epsilon */
 FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE ScopeOpen Statements RBRACE {
           RetType_c* ret_type =  (RetType_c*)$1;
           Formals_c* formal = (Formals_c*)$4;
-          $$ = new FuncDecl_c(ret_type->type , formal->decls);
+          ID_c* id = (ID_c*)$2;
+          id->type = ret_type->type;
+          $$ = new FuncDecl_c(ret_type->type , formal->decls, id->name);
+          sym_table->addFunction(sym_table->tables.top(), id->name, ret_type->type, NO_OFFSET);
           sym_table->closeScope();}
 RetType : Type {Type_c* type = (Type_c*)$1;
                 $$ = new RetType_c(type->type);}
@@ -81,6 +84,7 @@ Statement : LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
                                 exit(1);
                         }
                         sym_table->insert(sym_table->tables.top(), id->name, type->type, sym_table->offsets.top() + 1);
+                        id->type = type->type;
                         //TODO: need something for the statement?
                         }
             | Type ID ASSIGN Exp SC     {Type_c* type = (Type_c*)$1;
@@ -102,7 +106,7 @@ Statement : LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
             {
                 ID_c* id = (ID_c*)($1);
                 Exp_c* exp = (Exp_c*)$4;
-                if(sym_table->isDec(id->name))
+                if(sym_table->isDec(id->name, false))
                 {
                      errorUndef(yylineno, id->name);
                      exit(1);
@@ -124,24 +128,65 @@ Statement : LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
             | BREAK SC
             | CONTINUE SC
 Call : ID LPAREN ExpList RPAREN
+        {
+         ID_c* id = (ID_c*)($1);  
+         if(sym_table->isDec(id->name , true))
+        {
+             errorUndefFunc(yylineno, id->name);
+             exit(1);
+        }
+        $$ = new Call_c(id->type);
+        }
     | ID LPAREN RPAREN
+    {
+        ID_c* id = (ID_c*)($1);  
+        if(sym_table->isDec(id->name , true))
+        {
+             errorUndefFunc(yylineno, id->name);
+             exit(1);
+        }
+        $$ = new Call_c(id->type);
+    }
 ExpList : Exp
         | Exp COMMA ExpList
 Type : INT  {$$ = new Type_c(Int_t);}
         | BYTE {$$ = new Type_c(Byte_t);}
         | BOOL {$$ = new Type_c(Bool_t);}
 Exp : LPAREN Exp RPAREN {
-
+        Exp_c* exp = (Exp_c*)$2;
+        $$ = new Exp_c(exp->type);
         }
     | Exp IF LPAREN Exp RPAREN ELSE Exp
+    {
+        Exp_c* exp1 = (Exp_c*)$1;
+        Exp_c* exp2 = (Exp_c*)$4;
+        Exp_c* exp3 = (Exp_c*)$7;
+        //if(checkBoolExp(ex2))
+    }
     | Exp PLUS_MINUS Exp
+    {
+        if(checkNumType(*(Exp_c*)$1, *(Exp_c*)$3) == None_t)
+        {
+            errorMismatch(yylineno);
+            exit(1);
+        }
+        $$ = new Exp_c(checkNumType(*(Exp_c*)$1, *(Exp_c*)$3));
+    }
     | Exp MULT_DIV Exp
+    {
+        if(checkNumType(*(Exp_c*)$1, *(Exp_c*)$3) == None_t)
+        {
+            errorMismatch(yylineno);
+            exit(1);
+        }
+        $$ = new Exp_c(checkNumType(*(Exp_c*)$1, *(Exp_c*)$3));
+    }
     | ID        {ID_c* id = (ID_c*)($1);
-                if(sym_table->isDec(id->name)) {
+                if(sym_table->isDec(id->name, false)) {
                         errorUndef(yylineno, id->name);
                         exit(1);
                 }
-                $$ = new Exp_c(NONE_t);}
+                $$ = new Exp_c(None_t);}
     | Call
     | NUM {$$ = new Exp_c(Int_t);}
     | NUM B {$$ = new Exp_c(Byte_t);}

@@ -37,13 +37,25 @@ void SymbolTable::insert(Table *table, const std::string& name, type_enum type, 
     this->offsets.push(offset);
 }
 
-bool SymbolTable::isDec(const std::string& name) {
+void SymbolTable::addFunction(Table *table, const std::string& name, type_enum type, int offset)
+{
+    TableEntry *new_entry = new TableEntry(name, type, offset);
+    table->parent->insert(new_entry);
+}
+
+bool SymbolTable::isDec(const std::string& name, bool function) {
     bool found = false;
     Table* curr_table = this->tables.top();
     while (curr_table != nullptr) {
         for (auto & entry : curr_table->entry_list) {
             if (entry->name == name) {
+                if(function && !entry->isfunction)
+                {
+                    found = false;
+                }
+            else{
                 found = true;
+            }
                 break;
             }
         }
@@ -70,5 +82,7 @@ void Table::insert(TableEntry *entry)
 {
     this->entry_list.push_back(entry);
 }
+
+
 
 

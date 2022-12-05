@@ -18,6 +18,29 @@ bool checkTypeExpId(ID_c& id, Exp_c& exp) {
     return id.type==exp.type;
 }
 
+type_enum checkNumType(Exp_c& exp1 , Exp_c& exp2)
+{
+    if(exp1.type == Int_t)
+    {
+        if(exp2.type != Int_t && exp2.type != Byte_t)
+        {
+            return None_t;
+        }
+        return Int_t;
+    }
+    if(exp2.type == Int_t && exp1.type != Byte_t)
+    {
+        return None_t;
+    }
+    else
+    {
+        return Int_t;
+    }
+    if( exp1.type != Byte_t && exp2.type != Byte_t)
+        return None_t;
+    return Byte_t;
+}
+
 std::string typeToString(type_enum type)
 {
     switch (type)

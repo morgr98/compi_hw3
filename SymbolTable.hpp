@@ -7,6 +7,7 @@
 #include <stack>
 #include "Stypes.hpp"
 #include "hw3_output.hpp"
+#define NO_OFFSET 0xffffffff
 
 class TableEntry{
 public:
@@ -42,6 +43,7 @@ public:
     /* Maketable makes a table which points to it's parent */
     Table *makeTable(Table *parent);
     void insert(Table *table, const std::string& name, type_enum type, int offest);
+    void addFunction(Table *table, const std::string& name, type_enum type, int offest);
     void push_t(Table& table);
     void push_o(int offest);
     Table pop_t();
@@ -49,7 +51,7 @@ public:
     Table top_t();
     int top_o();
 
-    bool isDec(const std::string& name);
+    bool isDec(const std::string& name, bool function);
     bool isAlreadyDecInScope(const std::string& name);
 
 };

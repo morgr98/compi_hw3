@@ -16,7 +16,7 @@ enum type_enum {
     Byte_t,
     String_t,
     Void_t,
-    NONE_t
+    None_t
 };
 
 class Node {
@@ -70,8 +70,10 @@ public:
 class FuncDecl_c : public Node{
     public:
     type_enum type;
+    std::string name;
     std::vector<FormalDecl_c*> decls;
-    FuncDecl_c(type_enum type , const std::vector<FormalDecl_c*>& decls) : type(type), decls(decls){};
+    FuncDecl_c(type_enum type , const std::vector<FormalDecl_c*>& decls, std::string name) :
+     type(type), decls(decls), name(name){};
 };
 
 
@@ -95,7 +97,7 @@ public:
 class ID_c : public Node {
 public:
     const std::string name;
-    type_enum type = NONE_t;
+    type_enum type = None_t;
     ID_c(const std::string name) : name(name){};
 };
 
@@ -105,6 +107,8 @@ bool checkTypeExp(Type_c& type, Exp_c& exp);
 bool checkTypeExpId(ID_c& id, Exp_c& exp);
 bool isDec(ID_c *id);
 std::string typeToString(type_enum type);
+type_enum checkNumType(Exp_c& exp1, Exp_c& exp2);
+//bool check
 
 
 
