@@ -1,9 +1,10 @@
 %{
     /* Declarations section */
+
 #include <stdio.h>
+#include "Stypes.hpp"
 #include "parser.tab.hpp"
 #include "hw3_output.hpp"
-#include "Stypes.hpp"
 using namespace output;
 
 %}
@@ -74,8 +75,8 @@ b return  B;
 {equal_relop} return EQUAL_RELOP;
 {plus_minus} return PLUS_MINUS;
 {mult_div} return MULT_DIV;
-{num} return NUM;
-{id} {ID_c *id = new ID_c(yytext); return ID;}
+{num} return NUM; {Num_c* num = new Num_c(yytext); yylval = (Node*)num; return NUM;}
+{id} {ID_c* id = new ID_c(yytext); yylval = (Node*)id; return ID;}
 {string} return STRING;
 {comment}
 {whitespace}

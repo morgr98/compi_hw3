@@ -1,10 +1,24 @@
 #include "SymbolTable.hpp"
 
+SymbolTable* SymbolTable::getSymTable() {
+    static SymbolTable sym_table;
+    return &sym_table;
+}
+
+Table* SymbolTable::makeGlob() {
+    this->offsets.push(0);
+    Table *new_table = this->makeTable(nullptr);
+    this->tables.push(new_table);
+    return new_table;
+}
+
 Table* SymbolTable::newScope() {
     /* Add the same offset for a new scope */
+    std::cout <<"1" << endl;
     this->offsets.push(this->offsets.top());
     /* New table which points to it's parent */
     /* TODO: is the parent always the one currently in the top of the stack? */
+    std::cout <<"2" << endl;
     Table *new_table = this->makeTable(this->tables.top());
     this->tables.push(new_table);
     return new_table;
@@ -43,6 +57,14 @@ void SymbolTable::addFunction(Table *table, const std::string& name, type_enum t
     table->parent->insert(new_entry);
 }
 
+void SymbolTable::addFunctionParams(const std::vector<FormalDecl_c*>& decls) {
+    int offset = -1;
+    for (auto& dec : decls) {
+        this->insert(this->tables.top(), dec->name, dec->type, offset);
+        offset--;
+    }
+}
+
 bool SymbolTable::isDec(const std::string& name, bool function) {
     bool found = false;
     Table* curr_table = this->tables.top();
@@ -77,6 +99,7 @@ bool SymbolTable::isAlreadyDecInScope(const std::string& name) {
     }
     return found;
 }
+
 
 void Table::insert(TableEntry *entry)
 {

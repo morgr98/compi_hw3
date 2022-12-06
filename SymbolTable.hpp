@@ -1,13 +1,9 @@
 #ifndef COMPI_HW3_SYMBOL_TABLE_HPP
 #define COMPI_HW3_SYMBOL_TABLE_HPP
 
-#include <iostream>
-#include <vector>
-#include "string"
 #include <stack>
 #include "Stypes.hpp"
 #include "hw3_output.hpp"
-#define NO_OFFSET 0xffffffff
 
 class TableEntry{
 public:
@@ -36,11 +32,14 @@ public:
     std::stack<int> offsets;
 
     SymbolTable() = default;
+    /* Generates the symbol table if it doesn't exist. otherwise returns the instance */
+    static SymbolTable *getSymTable();
     /* Creates a new scope and returns a pointer to the new table added */
     Table* newScope();
     /* Closes current scope */
     void closeScope();
     /* Maketable makes a table which points to it's parent */
+    Table* makeGlob();
     Table *makeTable(Table *parent);
     void insert(Table *table, const std::string& name, type_enum type, int offest);
     void addFunction(Table *table, const std::string& name, type_enum type, int offest);
@@ -53,6 +52,7 @@ public:
 
     bool isDec(const std::string& name, bool function);
     bool isAlreadyDecInScope(const std::string& name);
+    void addFunctionParams(const std::vector<FormalDecl_c*>& decls);
 
 };
 

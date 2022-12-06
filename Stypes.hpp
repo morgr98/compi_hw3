@@ -8,7 +8,9 @@
 #include <iostream>
 #include <vector>
 #include "string"
+#define NO_OFFSET 0xffffffff
 #define YYSTYPE Node*
+
 
 enum type_enum {
     Int_t,
@@ -62,9 +64,9 @@ public:
 class FormalDecl_c : public Node {
 public:
     type_enum type;
-    const std::string id;
+    const std::string name;
 
-    FormalDecl_c(type_enum type, const std::string& id) : type(type), id(id) {};
+    FormalDecl_c(type_enum type, const std::string& name) : type(type), name(name) {};
 };
 
 class FuncDecl_c : public Node{
@@ -99,6 +101,13 @@ public:
     const std::string name;
     type_enum type = None_t;
     ID_c(const std::string name) : name(name){};
+};
+
+class Num_c : public Node {
+public:
+    const std::string num_str;
+    type_enum type = None_t;
+    Num_c(const std::string num_str) : num_str(num_str){};
 };
 
 bool checkBoolExp(Exp_c& exp);
