@@ -117,7 +117,8 @@ bool checkTypeExpId(ID_c& id, Exp_c& exp);
 bool isDec(ID_c *id);
 std::string typeToString(type_enum type);
 type_enum checkNumType(Exp_c& exp1, Exp_c& exp2);
-//bool check
+type_enum checkSameTypeExp(Exp_c& exp1 , Exp_c& exp2);
+type_enum checkAssigment(type_enum type, Exp_c& exp1);
 
 
 

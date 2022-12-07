@@ -168,7 +168,15 @@ Exp : LPAREN Exp RPAREN {
         Exp_c* exp1 = (Exp_c*)$1;
         Exp_c* exp2 = (Exp_c*)$4;
         Exp_c* exp3 = (Exp_c*)$7;
-        //if(checkBoolExp(ex2))
+        if(checkBoolExp(*exp2) && checkSameTypeExp(*exp1, *exp3) == None_t)
+        {
+            errorMismatch(yylineno);
+            exit(1);
+        }
+        else
+        {
+            $$ = new Exp_c(checkSameTypeExp(*exp1, *exp2));         
+        }
     }
     | Exp PLUS_MINUS Exp
     {
@@ -195,6 +203,10 @@ Exp : LPAREN Exp RPAREN {
                 }
                 $$ = new Exp_c(None_t);}
     | Call
+    {
+        Call_c* call = (Call_c*)$1;
+        $$ = new Exp_c(call->type);
+    }
     | NUM {$$ = new Exp_c(Int_t);}
     | NUM B {$$ = new Exp_c(Byte_t);}
     | STRING {$$ = new Exp_c(String_t);}
@@ -212,12 +224,50 @@ Exp : LPAREN Exp RPAREN {
                         exit(1);}
     | Exp OR Exp {if (checkBoolExp(*(Exp_c*)$1, *(Exp_c*)$3))
                         $$ = new Exp_c(Bool_t);
-                  else
+                  else{
                         errorMismatch(yylineno);
                         exit(1);}
+                    }
+
     | Exp RELOP Exp
+    
+    {
+        Exp_c* exp1 = (Exp_c*)$1;
+        Exp_c* exp2 = (Exp_c*)$3;
+        if(checkNumType(*exp1, *exp2) == None_t)
+        {
+            errorMismatch(yylineno);
+            exit(1);
+
+        }
+        else
+           $$ = new Exp_c(Bool_t);
+    }
     | Exp EQUAL_RELOP Exp
+    {
+        Exp_c* exp1 = (Exp_c*)$1;
+        Exp_c* exp2 = (Exp_c*)$3;
+        if(checkNumType(*exp1, *exp2) == None_t)
+        {
+            errorMismatch(yylineno);
+            exit(1);
+
+        }
+        else
+           $$ = new Exp_c(Bool_t);
+    }
     | LPAREN Type RPAREN Exp
+    {
+        Type_c* type = (Type_c*)$2;
+        Exp_c* exp = (Exp_c*)$4;
+        if(checkAssigment(type->type , *exp) != None_t)
+            $$ = new Exp_c(type->type);
+        else
+        {
+            errorMismatch(yylineno);
+            exit(1);
+        }
+    }
 ScopeOpen : /* Epsilon */ {sym_table->newScope();}
 %%
 

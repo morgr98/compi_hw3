@@ -18,6 +18,16 @@ bool checkTypeExpId(ID_c& id, Exp_c& exp) {
     return id.type==exp.type;
 }
 
+type_enum checkSameTypeExp(Exp_c& exp1 , Exp_c& exp2)
+{
+    if (exp1.type == exp2.type)
+        return exp1.type;
+    if (exp1.type == Int_t && exp2.type == Byte_t)
+        return exp1.type;
+    if (exp1.type == Byte_t && exp2.type == Int_t)
+        return exp2.type;
+    return None_t;
+}
 type_enum checkNumType(Exp_c& exp1 , Exp_c& exp2)
 {
     if(exp1.type == Int_t)
@@ -39,6 +49,15 @@ type_enum checkNumType(Exp_c& exp1 , Exp_c& exp2)
     if( exp1.type != Byte_t && exp2.type != Byte_t)
         return None_t;
     return Byte_t;
+}
+
+type_enum checkAssigment(type_enum type, Exp_c& exp1)
+{
+    if(type == Int_t && (exp1.type == Byte_t || exp1.type == Int_t))
+        return Int_t;
+    if(type == Byte_t && (exp1.type == Int_t || exp1.type == Byte_t))
+        return Byte_t;
+    return None_t;
 }
 
 std::string typeToString(type_enum type)
