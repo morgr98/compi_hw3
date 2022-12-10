@@ -9,9 +9,10 @@ class TableEntry{
 public:
     const std::string name;
     type_enum type;
-    int offest;
+    int offset;
     bool isfunction;
-    TableEntry(const std::string& name, type_enum type, int offest) : name(name), type(type), offest(offest){};
+    std::vector<std::string> argtypes;
+    TableEntry(const std::string& name, type_enum type, int offset, bool isfunction = false) : name(name), type(type), offset(offset), isfunction(isfunction){};
     
 };
 
@@ -27,7 +28,6 @@ public:
 
 class SymbolTable {
 public:
-    /* Using vectors so we could use iterators (stacks don't have)*/
     std::stack<Table*> tables;
     std::stack<int> offsets;
 
@@ -41,10 +41,11 @@ public:
     /* Maketable makes a table which points to it's parent */
     Table* makeGlob();
     Table *makeTable(Table *parent);
-    void insert(Table *table, const std::string& name, type_enum type, int offest);
-    void addFunction(Table *table, const std::string& name, type_enum type, int offest);
+    void insert(Table *table, const std::string& name, type_enum type, int offset, bool isfunc = false);
+    void addFunction(Table *table, const std::string& name, type_enum type, int offset);
+    bool isFirstInCurScope(Table* table);
     void push_t(Table& table);
-    void push_o(int offest);
+    void push_o(int offset);
     Table pop_t();
     int pop_o();
     Table top_t();

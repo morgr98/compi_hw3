@@ -30,6 +30,8 @@ type_enum checkSameTypeExp(Exp_c& exp1 , Exp_c& exp2)
 }
 type_enum checkNumType(Exp_c& exp1 , Exp_c& exp2)
 {
+    if (exp1.type == Int_t && exp2.type == Int_t)
+        return Int_t;
     if(exp1.type == Int_t)
     {
         if(exp2.type != Int_t && exp2.type != Byte_t)
