@@ -7,22 +7,22 @@ SymbolTable* SymbolTable::getSymTable() {
 
 Table* SymbolTable::makeGlob() {
     this->offsets.push(0);
-    Table *new_table = this->makeTable(nullptr);
+    Table *new_table = this->makeTable(nullptr, false);
     this->tables.push(new_table);
     /* Add print and printi functions */
-    this->insert(this->tables.top(), "print", String_t, NO_OFFSET, true);
+    this->insert(this->tables.top(), "print", Void_t, NO_OFFSET, true);//chane to void type
     this->tables.top()->entry_list.back()->argtypes.push_back("STRING");
-    this->insert(this->tables.top(), "printi", Int_t, NO_OFFSET, true);
+    this->insert(this->tables.top(), "printi", Void_t, NO_OFFSET, true);
     this->tables.top()->entry_list.back()->argtypes.push_back("INT");
     return new_table;
 }
 
-Table* SymbolTable::newScope() {
+Table* SymbolTable::newScope(bool iswhile) {
     /* Add the same offset for a new scope */
     this->offsets.push(this->offsets.top());
     /* New table which points to it's parent */
     /* TODO: is the parent always the one currently in the top of the stack? */
-    Table *new_table = this->makeTable(this->tables.top());
+    Table *new_table = this->makeTable(this->tables.top(), iswhile);
     this->tables.push(new_table);
     return new_table;
 }
@@ -45,8 +45,8 @@ void SymbolTable::closeScope() {
 }
 
 
-Table* SymbolTable::makeTable(Table* parent) {
-    Table *table = new Table(parent);
+Table* SymbolTable::makeTable(Table* parent, bool iswhile) {
+    Table *table = new Table(parent, iswhile);
     return table;
 }
 
@@ -85,6 +85,58 @@ void SymbolTable::addFunctionParams(const std::vector<FormalDecl_c*>& decls) {
     }
 }
 
+bool SymbolTable::checkFunctionParams(ExpList_c& exp_list, const std::string& name)
+{
+    Table* curr_table = this->tables.top();
+    TableEntry* table_entry;
+    while (curr_table != nullptr) {
+        for (auto & entry : curr_table->entry_list) {
+            if (entry->name == name) {
+                table_entry = entry;
+                break;
+            }
+        }
+        curr_table = curr_table->parent;
+    }
+    if(table_entry->argtypes.size() != exp_list.expressions.size())
+    {
+        errorPrototypeMismatch(yylineno, name, table_entry->argtypes);
+        exit(1);
+    }
+    int i = 0;
+    for(auto argtype : table_entry->argtypes)
+    {
+        if(typeToString(exp_list.expressions[i]->type).compare(argtype))
+        {
+            errorPrototypeMismatch(yylineno, name, table_entry->argtypes);
+            exit(1);
+        }
+    }
+
+}
+
+bool SymbolTable::checkFunctionParams(const std::string& name)
+{
+    Table* curr_table = this->tables.top();
+    TableEntry* table_entry;
+    while (curr_table != nullptr) {
+        for (auto & entry : curr_table->entry_list) {
+            if (entry->name == name) {
+                table_entry = entry;
+                break;
+            }
+        }
+        curr_table = curr_table->parent;
+    }
+    if(table_entry->argtypes.size() !=0)
+    {
+        errorPrototypeMismatch(yylineno, name, table_entry->argtypes);
+        exit(1);
+    }
+}
+
+
+
 bool SymbolTable::isDec(const std::string& name, bool function) {
     bool found = false;
     Table* curr_table = this->tables.top();
@@ -92,12 +144,12 @@ bool SymbolTable::isDec(const std::string& name, bool function) {
         for (auto & entry : curr_table->entry_list) {
             //cout << "comparing " << entry->name << " to " << name << endl;
             if (entry->name == name) {
-                if(function && !entry->isfunction)
+                if(function == entry->isfunction)
                 {
-                    found = false;
+                    found = true;
                 }
             else{
-                found = true;
+                found = false;
             }
                 break;
             }
@@ -121,6 +173,42 @@ bool SymbolTable::isAlreadyDecInScope(const std::string& name) {
     return found;
 }
 
+bool SymbolTable::inScopeWhile(Table *table)
+{
+    Table* curr_table = table;
+    bool found = false;
+    while (curr_table != nullptr) {
+        if(curr_table->iswhile)
+        {
+            return true;
+        }
+        curr_table = curr_table->parent;
+    }
+    return false;
+}
+
+bool SymbolTable::checkSamefunctionReturnType(type_enum type)
+{
+    cout<<"here";
+    if(this->tables.top()->parent->entry_list.back()->type == type)
+        return true;
+    return false;
+}
+
+type_enum SymbolTable::getTypeByName(const std::string& name)
+{
+    Table* curr_table = this->tables.top();
+    while (curr_table != nullptr) {
+        for (auto & entry : curr_table->entry_list) {
+            //cout << "comparing " << entry->name << " to " << name << endl;
+            if (entry->name == name) {
+                return entry->type;
+            }
+        }
+        curr_table = curr_table->parent;
+    }
+    return None_t;
+}
 
 void Table::insert(TableEntry *entry)
 {

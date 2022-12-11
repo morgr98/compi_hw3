@@ -75,7 +75,7 @@ b return  B;
 {equal_relop} return EQUAL_RELOP;
 {plus_minus} return PLUS_MINUS;
 {mult_div} return MULT_DIV;
-{num} return NUM; {Num_c* num = new Num_c(yytext); yylval = (Node*)num; return NUM;}
+{num} {Num_c* num = new Num_c(yytext); yylval = (Node*)num; return NUM;}
 {id} {ID_c* id = new ID_c(yytext); yylval = (Node*)id; return ID;}
 {string} return STRING;
 {comment}

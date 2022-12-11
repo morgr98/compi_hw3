@@ -4,6 +4,8 @@
 #include <stack>
 #include "Stypes.hpp"
 #include "hw3_output.hpp"
+extern int yylineno;
+using namespace output;
 
 class TableEntry{
 public:
@@ -20,8 +22,8 @@ class Table{
 public:
     std::vector<TableEntry*> entry_list;
     Table* parent;
-
-    Table(Table* parent) : parent(parent) {};
+    bool iswhile;
+    Table(Table* parent, bool iswhile) : parent(parent) , iswhile(iswhile){};
     void insert(TableEntry *entry);
     bool contains(std::string name);
 };
@@ -35,12 +37,12 @@ public:
     /* Generates the symbol table if it doesn't exist. otherwise returns the instance */
     static SymbolTable *getSymTable();
     /* Creates a new scope and returns a pointer to the new table added */
-    Table* newScope();
+    Table* newScope(bool iswhile);
     /* Closes current scope */
     void closeScope();
     /* Maketable makes a table which points to it's parent */
     Table* makeGlob();
-    Table *makeTable(Table *parent);
+    Table *makeTable(Table *parent, bool iswhile);
     void insert(Table *table, const std::string& name, type_enum type, int offset, bool isfunc = false);
     void addFunction(Table *table, const std::string& name, type_enum type, int offset);
     bool isFirstInCurScope(Table* table);
@@ -54,7 +56,11 @@ public:
     bool isDec(const std::string& name, bool function);
     bool isAlreadyDecInScope(const std::string& name);
     void addFunctionParams(const std::vector<FormalDecl_c*>& decls);
-
+    bool checkFunctionParams(ExpList_c& exp_list, const std::string& name);
+    bool checkFunctionParams(const std::string& name);
+    bool inScopeWhile(Table *table);
+    bool checkSamefunctionReturnType(type_enum type);
+    type_enum getTypeByName(const std::string& name);
 };
 
 

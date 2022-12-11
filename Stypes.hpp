@@ -43,8 +43,8 @@ public:
 class Call_c : public Node {
 public:
     type_enum type;
-
-    Call_c(type_enum type1) : type(type1) {};
+    const std::string name;
+    Call_c(type_enum type1, const std::string name) : type(type1), name(name) {};
 };
 
 class Exp_c : public Node {
@@ -56,9 +56,9 @@ public:
 
 class ExpList_c : public Node {
 public:
-    std::vector<Exp_c> expressions;
+    std::vector<Exp_c*> expressions;
 
-    ExpList_c(const std::vector<Exp_c>& expressions) : expressions(expressions) {};
+    ExpList_c(const std::vector<Exp_c*>& expressions) : expressions(expressions) {};
 };
 
 class FormalDecl_c : public Node {
