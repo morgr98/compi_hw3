@@ -63,7 +63,7 @@ void SymbolTable::insert(Table *table, const std::string& name, type_enum type, 
 }
 
 bool SymbolTable::isFirstInCurScope(Table* table) {
-    if (table->entry_list.empty() && table->parent->entry_list.back() && table->parent->entry_list.back()->isfunction == true)
+    if (table->entry_list.empty() && table->parent !=nullptr && !table->parent->entry_list.empty() && table->parent->entry_list.back()->isfunction == true)
         return true;
     return false;
 }
