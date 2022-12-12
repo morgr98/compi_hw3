@@ -56,8 +56,8 @@ void SymbolTable::insert(Table *table, const std::string& name, type_enum type, 
     if (!isfunc && offset > 0 && this->isFirstInCurScope(table)) {
         offset--;
         }
-    std::cout << "Inserting: " << name << " type: " << type << " offset: " << offset << " is func:" << isfunc <<endl;
-     TableEntry *new_entry = new TableEntry(name, type, offset, isfunc);
+    //std::cout << "Inserting: " << name << " type: " << type << " offset: " << offset << " is func:" << isfunc <<endl;
+    TableEntry *new_entry = new TableEntry(name, type, offset, isfunc);
     table->insert(new_entry);
     this->offsets.push(offset);
 }

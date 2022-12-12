@@ -14,8 +14,8 @@ bool checkTypeExp(Type_c& type, Exp_c& exp) {
     return type.type==exp.type;
 }
 
-bool checkTypeExpId(ID_c& id, Exp_c& exp) {
-    return id.type==exp.type;
+bool checkTypeExpId(type_enum type, Exp_c& exp) {
+    return type==exp.type;
 }
 
 type_enum checkSameTypeExp(Exp_c& exp1 , Exp_c& exp2)

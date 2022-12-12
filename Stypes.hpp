@@ -106,14 +106,14 @@ public:
 class Num_c : public Node {
 public:
     const std::string num_str;
-    type_enum type = None_t;
+    type_enum type = Int_t;
     Num_c(const std::string num_str) : num_str(num_str){};
 };
 
 bool checkBoolExp(Exp_c& exp);
 bool checkBoolExp(Exp_c& exp1, Exp_c& exp2);
 bool checkTypeExp(Type_c& type, Exp_c& exp);
-bool checkTypeExpId(ID_c& id, Exp_c& exp);
+bool checkTypeExpId(type_enum type, Exp_c& exp);
 bool isDec(ID_c *id);
 std::string typeToString(type_enum type);
 type_enum checkNumType(Exp_c& exp1, Exp_c& exp2);

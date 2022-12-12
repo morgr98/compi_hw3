@@ -88,7 +88,9 @@ FormalDecl : Type ID    {Type_c* type = (Type_c*)$1;
                         $$ = formaldecl;}
 Statements : Statement
             | Statements Statement
-Statement : LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
+Statement : LBRACE ScopeOpen Statements RBRACE {
+                cout<<"want to find the seg fault"<<endl;
+                sym_table->closeScope();}
             | Type ID SC {Type_c* type = (Type_c*)$1;
                         ID_c* id = (ID_c*)$2;
                         if (sym_table->isAlreadyDecInScope(id->name)) {
@@ -99,36 +101,44 @@ Statement : LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
                         id->type = type->type;
                         //TODO: need something for the statement?
                         }
-            | Type ID ASSIGN Exp SC     {Type_c* type = (Type_c*)$1;
-                                        ID_c* id = (ID_c*)$2;
-                                        Exp_c* exp = (Exp_c*)$4;
-                                        if (sym_table->isAlreadyDecInScope(id->name)) {
-                                                errorDef(yylineno, id->name);
-                                                exit(1);
-                                        }
-                                        if (!checkTypeExp(*type, *exp)) {
-                                                 errorMismatch(yylineno);
-                                                 exit(1);
-                                        }
-                                        sym_table->insert(sym_table->tables.top(), id->name, type->type, sym_table->offsets.top() + 1);
-                                        id->type = type->type;
-                                        //TODO: need something for the statement?
-                                        }
+            | Type ID ASSIGN Exp SC     {
+                Type_c* type = (Type_c*)$1;
+                ID_c* id = (ID_c*)$2;
+                Exp_c* exp = (Exp_c*)$4;
+                cout<<"gilad the king"<<endl;
+                if (sym_table->isAlreadyDecInScope(id->name)) {
+                    errorDef(yylineno, id->name);
+                    exit(1);
+                    }
+                cout<<"type of type "<<type->type<<endl;
+                cout<<"type of exp "<<exp->type<<endl;
+                if (!checkTypeExp(*type, *exp)) {
+                    errorMismatch(yylineno);
+                    exit(1);
+                }
+                cout<<"gilad the king!! "<<id->name<<endl;
+                sym_table->insert(sym_table->tables.top(), id->name, type->type, sym_table->offsets.top() + 1);
+                id->type = type->type;
+                //TODO: need something for the statement?
+                }
             | ID ASSIGN Exp SC
             {
                 ID_c* id = (ID_c*)($1);
-                Exp_c* exp = (Exp_c*)$4;
+                Exp_c* exp = (Exp_c*)$3;
                 if(!sym_table->isDec(id->name, false))
                 {
                      errorUndef(yylineno, id->name);
                      exit(1);
                 }
-                 if (!checkTypeExpId(*id, *exp)) {
+                 if (!checkTypeExpId(sym_table->getTypeByName(id->name), *exp)) {
                      errorMismatch(yylineno);
                      exit(1);
                 }
             }
-            | Call SC  // no needed a check?
+            | Call SC 
+            {
+                cout<<"i dont know what to write"<<endl;
+            } // no needed a check?
             | RETURN SC
             {
                 if(!sym_table->checkSamefunctionReturnType(Void_t))
@@ -140,6 +150,7 @@ Statement : LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
             | RETURN Exp SC
             {
                 Exp_c* exp1 = (Exp_c*)$2;
+                cout<<"the type of exp "<<exp1->type<<endl; 
                 if(!sym_table->checkSamefunctionReturnType(exp1->type))
                 {
                     errorMismatch(yylineno);
@@ -158,6 +169,7 @@ Statement : LBRACE ScopeOpen Statements RBRACE {sym_table->closeScope();}
             }
             | IF ScopeOpen LPAREN Exp RPAREN Statement ELSE ScopeOpen Statement ScopeClose
             {
+                cout<<"in the if rule"<<endl;
             if (!checkBoolExp(*(Exp_c*)$4))
                 {
                     errorMismatch(yylineno);
@@ -192,13 +204,15 @@ Call : ID LPAREN ExpList RPAREN
         {
          ID_c* id = (ID_c*)($1);
          ExpList_c* exp_list = (ExpList_c*)$3;
+         cout<<"the call function"<<endl;
          if(!sym_table->isDec(id->name , true))
         {
              errorUndefFunc(yylineno, id->name);
              exit(1);
         }
         sym_table->checkFunctionParams(*exp_list, id->name);
-        $$ = new Call_c(id->type, id->name);
+        $$ = new Call_c(sym_table->getTypeByName(id->name), id->name);
+        cout<<"the call function end"<<endl;
         }
     | ID LPAREN RPAREN
     {
@@ -213,6 +227,7 @@ Call : ID LPAREN ExpList RPAREN
     }
 ExpList : Exp
         {
+            cout<<"fcbarcelona"<<endl;
             Exp_c* exp1 = (Exp_c*)$1;
             std::vector<Exp_c*> expressions;
             expressions.push_back(exp1);
@@ -237,6 +252,7 @@ Exp : LPAREN Exp RPAREN {
         Exp_c* exp1 = (Exp_c*)$1;
         Exp_c* exp2 = (Exp_c*)$4;
         Exp_c* exp3 = (Exp_c*)$7;
+        cout<<"my name is mor "<<endl;
         if(checkBoolExp(*exp2) && checkSameTypeExp(*exp1, *exp3) == None_t)
         {
             errorMismatch(yylineno);
@@ -244,11 +260,16 @@ Exp : LPAREN Exp RPAREN {
         }
         else
         {
-            $$ = new Exp_c(checkSameTypeExp(*exp1, *exp2));         
+            cout<<"typ1 "<<exp1->type<<endl;
+            cout<<"typ2 "<<exp2->type<<endl;
+            cout<<"the chosem type is "<<checkSameTypeExp(*exp1, *exp3)<<endl;
+            $$ = new Exp_c(checkSameTypeExp(*exp1, *exp3));         
         }
     }
     | Exp PLUS_MINUS Exp
     {
+        Exp_c* exp1 = (Exp_c*)$1;
+        Exp_c* exp2 = (Exp_c*)$3;
         if(checkNumType(*(Exp_c*)$1, *(Exp_c*)$3) == None_t)
         {
             errorMismatch(yylineno);
@@ -274,6 +295,7 @@ Exp : LPAREN Exp RPAREN {
     | Call
     {
         Call_c* call = (Call_c*)$1;
+        cout<<"the type of call "<<call->type<<endl;
         $$ = new Exp_c(call->type);
     }
     | NUM {$$ = new Exp_c(Int_t);}
@@ -289,11 +311,16 @@ Exp : LPAREN Exp RPAREN {
     | STRING {$$ = new Exp_c(String_t);}
     | TRUE {$$ = new Exp_c(Bool_t);}
     | FALSE {$$ = new Exp_c(Bool_t);}
-    | NOT Exp {if (checkBoolExp(*(Exp_c*)$1))
+    | NOT Exp {
+                cout<<"good morning"<<endl;
+                if (checkBoolExp(*(Exp_c*)$2))
                     $$ = new Exp_c(Bool_t);
                 else
+                {
+                    cout<<"good morning 1"<<endl;
                     errorMismatch(yylineno);
                     exit(1);}
+                }
     | Exp AND Exp {if (checkBoolExp(*(Exp_c*)$1, *(Exp_c*)$3))
                         $$ = new Exp_c(Bool_t);
                    else
@@ -311,6 +338,8 @@ Exp : LPAREN Exp RPAREN {
     {
         Exp_c* exp1 = (Exp_c*)$1;
         Exp_c* exp2 = (Exp_c*)$3;
+        cout<<"the type of exp1 "<<exp1->type<<endl;
+        cout<<"the type of exp2 "<<exp2->type<<endl;
         if(checkNumType(*exp1, *exp2) == None_t)
         {
             errorMismatch(yylineno);
@@ -345,9 +374,11 @@ Exp : LPAREN Exp RPAREN {
             exit(1);
         }
     }
-ScopeOpen : /* Epsilon */ {std::cout << "NEW SCOPE" << endl;
+ScopeOpen : /* Epsilon */ {
+                            //std::cout << "NEW SCOPE" << endl;
                             sym_table->newScope(false);}
-ScopeWhileOpen : /* Epsilon */ {std::cout << "NEW SCOPE" << endl;
+ScopeWhileOpen : /* Epsilon */ {
+                            //std::cout << "NEW SCOPE" << endl;
                             sym_table->newScope(true);}
 ScopeClose : /* Epsilon */ {sym_table->closeScope();}                         
 %%
