@@ -66,14 +66,14 @@ Formals : /* Epsilon */
                 $$ = new Formals_c(formal_list->decls);}
 FormalsList : FormalDecl {FormalDecl_c* formaldecl = (FormalDecl_c*)$1;
                             std::vector<FormalDecl_c*> vec;
-                            vec.push_back(formaldecl);
+                            vec.insert(vec.begin(), formaldecl);
                             FormalsList_c* formals_list = new FormalsList_c(vec);
                             $$ = formals_list;}
         | FormalDecl COMMA FormalsList
         {
             FormalDecl_c* formaldecl = (FormalDecl_c*)$1;
             FormalsList_c* formal_list = (FormalsList_c*)$3;
-            formal_list->decls.push_back(formaldecl);
+            formal_list->decls.insert(formal_list->decls.begin(), formaldecl);
             $$ = new FormalsList_c(formal_list->decls);
         }
 FormalDecl : Type ID    {Type_c* type = (Type_c*)$1;
@@ -231,7 +231,7 @@ Call : ID LPAREN ExpList RPAREN
              exit(1);
         }
         sym_table->checkFunctionParams(id->name);
-        $$ = new Call_c(id->type, id->name);
+        $$ = new Call_c(sym_table->getTypeByName(id->name), id->name);
     }
 ExpList : Exp
         {
@@ -303,7 +303,7 @@ Exp : LPAREN Exp RPAREN {
     | Call
     {
         Call_c* call = (Call_c*)$1;
-        //<<"the type of call "<<call->type<<endl;
+       // cout<<"the type of call "<<call->type<<endl;
         $$ = new Exp_c(call->type);
     }
     | NUM {$$ = new Exp_c(Int_t);}

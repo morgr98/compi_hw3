@@ -11,11 +11,29 @@ bool checkBoolExp(Exp_c& exp1, Exp_c& exp2) {
     return exp1.type==Bool_t && exp2.type == Bool_t;
 }
 bool checkTypeExp(Type_c& type, Exp_c& exp) {
-    return type.type==exp.type;
+     if (type.type==exp.type)
+        return true;
+        
+    if(type.type == Int_t && exp.type == Byte_t)
+        return true;
+        /*
+    if(type.type == Byte_t && exp.type == Int_t)
+        return true;
+        */
+    return false;
 }
 
 bool checkTypeExpId(type_enum type, Exp_c& exp) {
-    return type==exp.type;
+    if (type==exp.type)
+        return true;
+        
+    if(type == Int_t && exp.type == Byte_t)
+        return true;
+        /*
+    if(type == Byte_t && exp.type == Int_t)
+        return true;
+        */
+    return false;
 }
 
 type_enum checkSameTypeExp(Exp_c& exp1 , Exp_c& exp2)

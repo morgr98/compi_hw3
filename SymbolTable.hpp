@@ -4,6 +4,7 @@
 #include <stack>
 #include "Stypes.hpp"
 #include "hw3_output.hpp"
+#include <algorithm>
 extern int yylineno;
 using namespace output;
 
@@ -53,6 +54,7 @@ public:
     Table top_t();
     int top_o();
 
+    bool compareByteInt(std::string type1, std::string type2);
     bool isDec(const std::string& name, bool function);
     bool isAlreadyDecInScope(const std::string& name);
     void addFunctionParams(const std::vector<FormalDecl_c*>& decls);
@@ -61,6 +63,7 @@ public:
     bool inScopeWhile(Table *table);
     bool checkSamefunctionReturnType(type_enum type);
     type_enum getTypeByName(const std::string& name);
+    
 };
 
 

@@ -85,6 +85,16 @@ void SymbolTable::addFunctionParams(const std::vector<FormalDecl_c*>& decls) {
     }
 }
 
+bool SymbolTable::compareByteInt(std::string type1, std::string type2)
+{
+    if(type1.compare("BYTE") && type2.compare("INT"))
+        return true;
+    if(type2.compare("BYTE") && type1.compare("INT"))
+        return true;
+    return false;
+}
+
+
 bool SymbolTable::checkFunctionParams(ExpList_c& exp_list, const std::string& name)
 {
     Table* curr_table = this->tables.top();
@@ -107,13 +117,18 @@ bool SymbolTable::checkFunctionParams(ExpList_c& exp_list, const std::string& na
     for(auto argtype : table_entry->argtypes)
     {
         if(typeToString(exp_list.expressions[i]->type).compare(argtype))
-        {
-            errorPrototypeMismatch(yylineno, name, table_entry->argtypes);
-            exit(1);
+        {  
+            if(!compareByteInt(typeToString(exp_list.expressions[i]->type),argtype))
+            {
+                errorPrototypeMismatch(yylineno, name, table_entry->argtypes);
+                exit(1);
+            }
         }
+        i++;
     }
 
 }
+
 
 bool SymbolTable::checkFunctionParams(const std::string& name)
 {
@@ -189,9 +204,15 @@ bool SymbolTable::inScopeWhile(Table *table)
 
 bool SymbolTable::checkSamefunctionReturnType(type_enum type)
 {
-    cout<<"here";
-    if(this->tables.top()->parent->entry_list.back()->type == type)
+    type_enum type1 = this->tables.top()->parent->entry_list.back()->type;
+    if(type1 == type)
         return true;
+    /*
+    if(type1 == Int_t && type == Byte_t)
+        return true;
+    if(type1 == Byte_t && type == Int_t)
+        return true;
+        */
     return false;
 }
 
