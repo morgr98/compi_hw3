@@ -6,7 +6,8 @@ SymbolTable* SymbolTable::getSymTable() {
 }
 
 Table* SymbolTable::makeGlob() {
-    this->offsets.push(0);
+    this->offsets.push(-1);
+    //cout<<"the offest is !! "<<this->offsets.top()<<endl;
     Table *new_table = this->makeTable(nullptr, false);
     this->tables.push(new_table);
     /* Add print and printi functions */
@@ -14,6 +15,7 @@ Table* SymbolTable::makeGlob() {
     this->tables.top()->entry_list.back()->argtypes.push_back("STRING");
     this->insert(this->tables.top(), "printi", Void_t, NO_OFFSET, true);
     this->tables.top()->entry_list.back()->argtypes.push_back("INT");
+    //cout<<"the offest is ! "<<this->offsets.top()<<endl;
     return new_table;
 }
 
@@ -31,6 +33,7 @@ Table* SymbolTable::newScope(bool iswhile) {
 void SymbolTable::closeScope() {
     output::endScope();
     Table* table_out = this->tables.top();
+    //cout<<"the size of is "<<table_out->entry_list.size()<<endl;
     for (auto & entry : table_out->entry_list)
     {
         //std::cout <<"Entry is: " << entry->name << " offset is: " << entry->offset << endl;
@@ -54,9 +57,9 @@ Table* SymbolTable::makeTable(Table* parent, bool iswhile) {
 void SymbolTable::insert(Table *table, const std::string& name, type_enum type, int offset, bool isfunc) {
     //If symbol at the top is a funciton, then offset should be 0.
     //TODO: make sure is ok
-    if (!isfunc && offset > 0 && this->isFirstInCurScope(table)) {
-        offset--;
-        }
+    //if (!isfunc && offset > 0 && this->isFirstInCurScope(table)) {
+        //offset--;
+        //}
     //std::cout << "Inserting: " << name << " type: " << type << " offset: " << offset << " is func:" << isfunc <<endl;
     TableEntry *new_entry = new TableEntry(name, type, offset, isfunc);
     table->insert(new_entry);
@@ -64,7 +67,7 @@ void SymbolTable::insert(Table *table, const std::string& name, type_enum type, 
 }
 
 bool SymbolTable::isFirstInCurScope(Table* table) {
-    if (table->entry_list.empty() && table->parent !=nullptr && !table->parent->entry_list.empty() && table->parent->entry_list.back()->isfunction == true)
+    if (table->entry_list.empty() && table->parent !=nullptr && !table->parent->entry_list.empty()) //&& table->parent->entry_list.back()->isfunction == true)
         return true;
     return false;
 }
@@ -232,14 +235,18 @@ bool SymbolTable::inScopeWhile(Table *table)
     return false;
 }
 
-bool SymbolTable::checkSamefunctionReturnType(type_enum type)
+bool SymbolTable::checkSamefunctionReturnType(type_enum type, bool is_void)
 {
     type_enum type1 = this->tables.top()->parent->entry_list.back()->type;
+    if(type1 == Void_t && is_void)
+        return true;
+    if(type1 == Void_t && !is_void)
+        return false;
     if(type1 == type)
         return true;
-    /*
     if(type1 == Int_t && type == Byte_t)
         return true;
+    /*
     if(type1 == Byte_t && type == Int_t)
         return true;
         */
@@ -266,6 +273,24 @@ void Table::insert(TableEntry *entry)
     this->entry_list.push_back(entry);
 }
 
-
+bool SymbolTable::isMainExist()
+{
+    Table* curr_table = this->tables.top();
+    TableEntry* table_entry = nullptr;
+    while (curr_table != nullptr) {
+        for (auto & entry : curr_table->entry_list) {
+            if (entry->name == "main") {
+                table_entry = entry;
+                break;
+            }
+        }
+        curr_table = curr_table->parent;
+    }
+    if(table_entry == nullptr || !table_entry->isfunction || table_entry->argtypes.size() != 0 || table_entry->type != Void_t)
+    {
+        errorMainMissing();
+        exit(1);
+    }
+}
 
 

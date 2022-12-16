@@ -61,9 +61,10 @@ public:
     bool checkFunctionParams(std::vector<Exp_c*>& expressions, const std::string& name);
     bool checkFunctionParams(const std::string& name);
     bool inScopeWhile(Table *table);
-    bool checkSamefunctionReturnType(type_enum type);
+    bool checkSamefunctionReturnType(type_enum type, bool is_void);
     type_enum getTypeByName(const std::string& name);
     bool isFunctionAlreadyDecInScope(const std::string& name);
+    bool isMainExist();
     
 };
 

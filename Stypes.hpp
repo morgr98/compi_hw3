@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 #include "string"
-#define NO_OFFSET 0
+#define NO_OFFSET -1
 #define YYSTYPE Node*
 
 
