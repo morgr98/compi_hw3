@@ -19,6 +19,7 @@ Table* SymbolTable::makeGlob() {
 
 Table* SymbolTable::newScope(bool iswhile) {
     /* Add the same offset for a new scope */
+    //cout<<"new scope with offest "<<this->offsets.top()<<endl;
     this->offsets.push(this->offsets.top());
     /* New table which points to it's parent */
     /* TODO: is the parent always the one currently in the top of the stack? */
@@ -87,16 +88,17 @@ void SymbolTable::addFunctionParams(const std::vector<FormalDecl_c*>& decls) {
 
 bool SymbolTable::compareByteInt(std::string type1, std::string type2)
 {
-    if(type1.compare("BYTE") && type2.compare("INT"))
+    if((!type1.compare("BYTE")) && (!type2.compare("INT")))
         return true;
-    if(type2.compare("BYTE") && type1.compare("INT"))
+    if((!type2.compare("BYTE")) && (!type1.compare("INT")))
         return true;
     return false;
 }
 
 
-bool SymbolTable::checkFunctionParams(ExpList_c& exp_list, const std::string& name)
+bool SymbolTable::checkFunctionParams(std::vector<Exp_c*>& expressions, const std::string& name)
 {
+    //cout<<"check function params"<<endl;
     Table* curr_table = this->tables.top();
     TableEntry* table_entry;
     while (curr_table != nullptr) {
@@ -108,18 +110,24 @@ bool SymbolTable::checkFunctionParams(ExpList_c& exp_list, const std::string& na
         }
         curr_table = curr_table->parent;
     }
-    if(table_entry->argtypes.size() != exp_list.expressions.size())
+    if(table_entry->argtypes.size() != expressions.size())
     {
         errorPrototypeMismatch(yylineno, name, table_entry->argtypes);
         exit(1);
     }
+    //cout<<"type in exp"<<expressions[0]->type<<endl;
+    //cout<<"type in fun "<<table_entry->argtypes[0]<<endl;
     int i = 0;
     for(auto argtype : table_entry->argtypes)
     {
-        if(typeToString(exp_list.expressions[i]->type).compare(argtype))
+        if(typeToString(expressions[i]->type).compare(argtype))
         {  
-            if(!compareByteInt(typeToString(exp_list.expressions[i]->type),argtype))
+           //cout<<"in the if"<<endl;
+            //cout<<"type in exp"<<expressions[i]->type<<endl;
+            //cout<<"type in fun "<<argtype<<endl;
+            if(!compareByteInt(typeToString(expressions[i]->type),argtype))
             {
+              //  cout<<"in the second if"<<endl;
                 errorPrototypeMismatch(yylineno, name, table_entry->argtypes);
                 exit(1);
             }
@@ -132,6 +140,7 @@ bool SymbolTable::checkFunctionParams(ExpList_c& exp_list, const std::string& na
 
 bool SymbolTable::checkFunctionParams(const std::string& name)
 {
+    //cout<<"check function params"<<endl;
     Table* curr_table = this->tables.top();
     TableEntry* table_entry;
     while (curr_table != nullptr) {
@@ -177,14 +186,35 @@ bool SymbolTable::isDec(const std::string& name, bool function) {
 }
 
 bool SymbolTable::isAlreadyDecInScope(const std::string& name) {
+    //cout<<"already?"<<endl;
     Table* curr_table = this->tables.top();
     bool found = false;
-    for (auto & entry : curr_table->entry_list) {
-        if (entry->name == name) {
-            found = true;
-            break;
+    //cout<<"the size of is "<<curr_table->entry_list.size()<<endl;
+    while (curr_table != nullptr) {
+        for (auto & entry : curr_table->entry_list) {
+         //  cout<<"the name is "<<entry->name<<endl;
+            if (entry->name == name) {
+                found = true;
+                break;
+            }
         }
-    }
+        curr_table = curr_table->parent;
+    }   
+    return found;
+}
+
+bool SymbolTable::isFunctionAlreadyDecInScope(const std::string& name) {
+    Table* curr_table = this->tables.top()->parent;
+    bool found = false;
+    while (curr_table != nullptr) {
+        for (auto & entry : curr_table->entry_list) {
+            if (entry->name == name) {
+                found = true;
+                break;
+            }
+        }
+        curr_table = curr_table->parent;
+    }   
     return found;
 }
 

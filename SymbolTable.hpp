@@ -58,11 +58,12 @@ public:
     bool isDec(const std::string& name, bool function);
     bool isAlreadyDecInScope(const std::string& name);
     void addFunctionParams(const std::vector<FormalDecl_c*>& decls);
-    bool checkFunctionParams(ExpList_c& exp_list, const std::string& name);
+    bool checkFunctionParams(std::vector<Exp_c*>& expressions, const std::string& name);
     bool checkFunctionParams(const std::string& name);
     bool inScopeWhile(Table *table);
     bool checkSamefunctionReturnType(type_enum type);
     type_enum getTypeByName(const std::string& name);
+    bool isFunctionAlreadyDecInScope(const std::string& name);
     
 };
 
