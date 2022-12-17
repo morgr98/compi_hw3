@@ -16,23 +16,14 @@ bool checkTypeExp(Type_c& type, Exp_c& exp) {
         
     if(type.type == Int_t && exp.type == Byte_t)
         return true;
-        /*
-    if(type.type == Byte_t && exp.type == Int_t)
-        return true;
-        */
     return false;
 }
 
 bool checkTypeExpId(type_enum type, Exp_c& exp) {
     if (type==exp.type)
         return true;
-        
     if(type == Int_t && exp.type == Byte_t)
         return true;
-        /*
-    if(type == Byte_t && exp.type == Int_t)
-        return true;
-        */
     return false;
 }
 

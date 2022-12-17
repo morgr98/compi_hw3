@@ -58,8 +58,6 @@ public:
     bool compareByteInt(std::string type1, std::string type2);
     bool isDec(const std::string& name, bool function);
     bool isAlreadyDecInScope(const std::string& name);
-    //bool areParamsAlreadyDecInScope(const std::vector<FormalDecl_c*>& decls);
-    //void addFunctionParams(const std::vector<FormalDecl_c*>& decls);
     void addFunctionParam(const FormalDecl_c& decl, int offset);
     bool checkFunctionParams(std::vector<Exp_c*>& expressions, const std::string& name);
     bool checkFunctionParams(const std::string& name);

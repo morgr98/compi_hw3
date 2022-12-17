@@ -7,7 +7,6 @@ SymbolTable* SymbolTable::getSymTable() {
 
 Table* SymbolTable::makeGlob() {
     this->offsets.push(-1);
-    //cout<<"the offest is !! "<<this->offsets.top()<<endl;
     Table *new_table = this->makeTable(nullptr, false);
     this->tables.push(new_table);
     /* Add print and printi functions */
@@ -15,16 +14,11 @@ Table* SymbolTable::makeGlob() {
     this->tables.top()->entry_list.back()->argtypes.push_back("STRING");
     this->insert(this->tables.top(), "printi", Void_t, NO_OFFSET, true);
     this->tables.top()->entry_list.back()->argtypes.push_back("INT");
-    //cout<<"the offest is ! "<<this->offsets.top()<<endl;
     return new_table;
 }
 
 Table* SymbolTable::newScope(bool iswhile) {
-    /* Add the same offset for a new scope */
-    //cout<<"new scope with offest "<<this->offsets.top()<<endl;
     this->offsets.push(this->offsets.top());
-    /* New table which points to it's parent */
-    /* TODO: is the parent always the one currently in the top of the stack? */
     Table *new_table = this->makeTable(this->tables.top(), iswhile);
     this->tables.push(new_table);
     return new_table;
@@ -33,10 +27,8 @@ Table* SymbolTable::newScope(bool iswhile) {
 void SymbolTable::closeScope() {
     output::endScope();
     Table* table_out = this->tables.top();
-    //cout<<"the size of is "<<table_out->entry_list.size()<<endl;
     for (auto & entry : table_out->entry_list)
     {
-        //std::cout <<"Entry is: " << entry->name << " offset is: " << entry->offset << endl;
         if(!entry->isfunction){
             output::printID(entry->name, entry->offset, typeToString(entry->type));
         }
@@ -55,20 +47,16 @@ Table* SymbolTable::makeTable(Table* parent, bool iswhile) {
 }
 
 void SymbolTable::insert(Table *table, const std::string& name, type_enum type, int offset, bool isfunc) {
-    //If symbol at the top is a funciton, then offset should be 0.
-    //TODO: make sure is ok
     if (!isfunc && offset > 0 && this->isFirstNoneParamInCurScope(table)) {
-        //std::cout << name << "offset before - is " << offset << endl;
         offset--;
         }
-    //std::cout << "Inserting: " << name << " type: " << type << " offset: " << offset << " is func:" << isfunc <<endl;
     TableEntry *new_entry = new TableEntry(name, type, offset, isfunc);
     table->insert(new_entry);
     this->offsets.push(offset);
 }
 
 bool SymbolTable::isFirstNoneParamInCurScope(Table* table) {
-    //if (not global && not mekoonan && (empty or just params above it)
+    //if (not global && not mekoonan && (empty or just params above it))
     if (table->parent !=nullptr && table->parent->parent == nullptr && (table->entry_list.empty() || table->entry_list.back()->offset < 0))
         return true;
     return false;
@@ -79,20 +67,6 @@ void SymbolTable::addFunction(Table *table, const std::string& name, type_enum t
     TableEntry *new_entry = new TableEntry(name, type, offset, true);
     table->parent->insert(new_entry);
 }
-
-/*void SymbolTable::addFunctionParams(const std::vector<FormalDecl_c*>& decls) {
-    int offset = -1;
-    int keep_offset = this->offsets.top();
-    // while entering function params, the top of the parent table is the symbol of the funciton itself
-    TableEntry *function_sym = this->tables.top()->parent->entry_list.back();
-    for (auto& dec : decls) {
-        this->insert(this->tables.top(), dec->name, dec->type, offset);
-        offset--;
-        function_sym->argtypes.push_back(typeToString(dec->type));
-    }
-    this->offsets.pop();
-    this->offsets.push(keep_offset);
-}*/
 
 void SymbolTable::addFunctionParam(const FormalDecl_c& decl, int offset) {
     // while entering function params, the top of the parent table is the symbol of the funciton itself
@@ -113,7 +87,6 @@ bool SymbolTable::compareByteInt(std::string type1, std::string type2)
 
 bool SymbolTable::checkFunctionParams(std::vector<Exp_c*>& expressions, const std::string& name)
 {
-    //cout<<"check function params"<<endl;
     Table* curr_table = this->tables.top();
     TableEntry* table_entry;
     while (curr_table != nullptr) {
@@ -130,26 +103,15 @@ bool SymbolTable::checkFunctionParams(std::vector<Exp_c*>& expressions, const st
         errorPrototypeMismatch(yylineno, name, table_entry->argtypes);
         exit(1);
     }
-    //cout<<"type in exp"<<expressions.back()->type<<endl;
-   // cout<<"type in fun "<<table_entry->argtypes[0]<<endl;
     std::vector<Exp_c*> expressions_reverse(expressions);
     reverse((&expressions_reverse)->begin(),(&expressions_reverse)->end());
-    //cout<<"start"<<endl;
-   // for(auto exp : expressions_reverse)
-  //  {
-       // cout<<exp->type<<endl;
-  //  }
     int i = 0;
     for(auto argtype : table_entry->argtypes)
     {
         if(typeToString(expressions_reverse[i]->type).compare(argtype))
         {  
-           //cout<<"in the if"<<endl;
-            //cout<<"type in exp "<<expressions[i]->type<<endl;
-            //cout<<"type in fun "<<argtype<<endl;
             if(!compareByteInt(typeToString(expressions_reverse[i]->type),argtype))
             {
-              //  cout<<"in the second if"<<endl;
                 errorPrototypeMismatch(yylineno, name, table_entry->argtypes);
                 exit(1);
             }
@@ -162,7 +124,6 @@ bool SymbolTable::checkFunctionParams(std::vector<Exp_c*>& expressions, const st
 
 bool SymbolTable::checkFunctionParams(const std::string& name)
 {
-    //cout<<"check function params"<<endl;
     Table* curr_table = this->tables.top();
     TableEntry* table_entry;
     while (curr_table != nullptr) {
@@ -188,7 +149,6 @@ bool SymbolTable::isDec(const std::string& name, bool function) {
     Table* curr_table = this->tables.top();
     while (curr_table != nullptr) {
         for (auto & entry : curr_table->entry_list) {
-            //cout << "comparing " << entry->name << " to " << name << endl;
             if (entry->name == name) {
                 if(function == entry->isfunction)
                 {
@@ -208,13 +168,10 @@ bool SymbolTable::isDec(const std::string& name, bool function) {
 }
 
 bool SymbolTable::isAlreadyDecInScope(const std::string& name) {
-    //cout<<"already?"<<endl;
     Table* curr_table = this->tables.top();
     bool found = false;
-    //cout<<"the size of is "<<curr_table->entry_list.size()<<endl;
     while (curr_table != nullptr) {
         for (auto & entry : curr_table->entry_list) {
-            //cout<<"the compared name is "<<entry->name<<endl;
             if (entry->name == name) {
                 found = true;
                 break;
@@ -225,13 +182,6 @@ bool SymbolTable::isAlreadyDecInScope(const std::string& name) {
     return found;
 }
 
-/*bool SymbolTable::areParamsAlreadyDecInScope(const std::vector<FormalDecl_c*>& decls) {
-    for (auto & param : decls) {
-        if (isAlreadyDecInScope(param->name))
-            return true;
-    }
-    return false;
-}*/
 
 bool SymbolTable::isFunctionAlreadyDecInScope(const std::string& name) {
     Table* curr_table = this->tables.top()->parent;
@@ -286,10 +236,6 @@ bool SymbolTable::checkSamefunctionReturnType(type_enum type, bool is_void)
         return true;
     if(type1 == Int_t && type == Byte_t)
         return true;
-    /*
-    if(type1 == Byte_t && type == Int_t)
-        return true;
-        */
     return false;
 }
 
@@ -298,7 +244,6 @@ type_enum SymbolTable::getTypeByName(const std::string& name)
     Table* curr_table = this->tables.top();
     while (curr_table != nullptr) {
         for (auto & entry : curr_table->entry_list) {
-            //cout << "comparing " << entry->name << " to " << name << endl;
             if (entry->name == name) {
                 return entry->type;
             }
