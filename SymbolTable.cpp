@@ -237,7 +237,20 @@ bool SymbolTable::inScopeWhile(Table *table)
 
 bool SymbolTable::checkSamefunctionReturnType(type_enum type, bool is_void)
 {
-    type_enum type1 = this->tables.top()->parent->entry_list.back()->type;
+    if(this->function_name_scope == "")
+        return false;
+    Table* curr_table = this->tables.top()->parent;
+    TableEntry* table_entry;
+    while (curr_table != nullptr) {
+        for (auto & entry : curr_table->entry_list) {
+            if (entry->name == this->function_name_scope) {
+                table_entry = entry;
+                break;
+            }
+        }
+        curr_table = curr_table->parent;
+    }
+    type_enum type1 = table_entry->type;
     if(type1 == Void_t && is_void)
         return true;
     if(type1 == Void_t && !is_void)

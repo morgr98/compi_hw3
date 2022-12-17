@@ -33,6 +33,7 @@ class SymbolTable {
 public:
     std::stack<Table*> tables;
     std::stack<int> offsets;
+    std::string function_name_scope = "";
 
     SymbolTable() = default;
     /* Generates the symbol table if it doesn't exist. otherwise returns the instance */
