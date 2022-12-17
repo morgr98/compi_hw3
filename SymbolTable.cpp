@@ -80,6 +80,7 @@ void SymbolTable::addFunction(Table *table, const std::string& name, type_enum t
 
 void SymbolTable::addFunctionParams(const std::vector<FormalDecl_c*>& decls) {
     int offset = -1;
+    int keep_offset = this->offsets.top();
     // while entering function params, the top of the parent table is the symbol of the funciton itself
     TableEntry *function_sym = this->tables.top()->parent->entry_list.back();
     for (auto& dec : decls) {
@@ -87,6 +88,8 @@ void SymbolTable::addFunctionParams(const std::vector<FormalDecl_c*>& decls) {
         offset--;
         function_sym->argtypes.push_back(typeToString(dec->type));
     }
+    this->offsets.pop();
+    this->offsets.push(keep_offset);
 }
 
 bool SymbolTable::compareByteInt(std::string type1, std::string type2)
@@ -118,17 +121,24 @@ bool SymbolTable::checkFunctionParams(std::vector<Exp_c*>& expressions, const st
         errorPrototypeMismatch(yylineno, name, table_entry->argtypes);
         exit(1);
     }
-    //cout<<"type in exp"<<expressions[0]->type<<endl;
-    //cout<<"type in fun "<<table_entry->argtypes[0]<<endl;
+    //cout<<"type in exp"<<expressions.back()->type<<endl;
+   // cout<<"type in fun "<<table_entry->argtypes[0]<<endl;
+    std::vector<Exp_c*> expressions_reverse(expressions);
+    reverse((&expressions_reverse)->begin(),(&expressions_reverse)->end());
+    //cout<<"start"<<endl;
+   // for(auto exp : expressions_reverse)
+  //  {
+       // cout<<exp->type<<endl;
+  //  }
     int i = 0;
     for(auto argtype : table_entry->argtypes)
     {
-        if(typeToString(expressions[i]->type).compare(argtype))
+        if(typeToString(expressions_reverse[i]->type).compare(argtype))
         {  
            //cout<<"in the if"<<endl;
-            //cout<<"type in exp"<<expressions[i]->type<<endl;
+            //cout<<"type in exp "<<expressions[i]->type<<endl;
             //cout<<"type in fun "<<argtype<<endl;
-            if(!compareByteInt(typeToString(expressions[i]->type),argtype))
+            if(!compareByteInt(typeToString(expressions_reverse[i]->type),argtype))
             {
               //  cout<<"in the second if"<<endl;
                 errorPrototypeMismatch(yylineno, name, table_entry->argtypes);

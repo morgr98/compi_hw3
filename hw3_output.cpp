@@ -44,10 +44,12 @@ string output::makeFunctionType(const string& retType, std::vector<string>& argT
 
 void output::errorLex(int lineno){
     cout << "line " << lineno << ":" << " lexical error" << endl;
+    std::exit(1);
 }
 
 void output::errorSyn(int lineno){
     cout << "line " << lineno << ":" << " syntax error" << endl;
+    std::exit(1);
 }
 
 void output::errorUndef(int lineno, const string& id){
