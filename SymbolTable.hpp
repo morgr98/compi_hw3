@@ -47,7 +47,7 @@ public:
     Table *makeTable(Table *parent, bool iswhile);
     void insert(Table *table, const std::string& name, type_enum type, int offset, bool isfunc = false);
     void addFunction(Table *table, const std::string& name, type_enum type, int offset);
-    bool isFirstInCurScope(Table* table);
+    bool isFirstNoneParamInCurScope(Table* table);
     void push_t(Table& table);
     void push_o(int offset);
     Table pop_t();
@@ -58,7 +58,9 @@ public:
     bool compareByteInt(std::string type1, std::string type2);
     bool isDec(const std::string& name, bool function);
     bool isAlreadyDecInScope(const std::string& name);
-    void addFunctionParams(const std::vector<FormalDecl_c*>& decls);
+    //bool areParamsAlreadyDecInScope(const std::vector<FormalDecl_c*>& decls);
+    //void addFunctionParams(const std::vector<FormalDecl_c*>& decls);
+    void addFunctionParam(const FormalDecl_c& decl, int offset);
     bool checkFunctionParams(std::vector<Exp_c*>& expressions, const std::string& name);
     bool checkFunctionParams(const std::string& name);
     bool inScopeWhile(Table *table);

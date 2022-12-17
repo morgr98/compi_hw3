@@ -22,7 +22,7 @@ SymbolTable *sym_table = SymbolTable::getSymTable();
 %nonassoc FALSE
 %nonassoc RETURN
 %nonassoc WHILE
-%nonassoc IF
+%right IF
 %nonassoc BREAK
 %nonassoc CONTINUE
 %nonassoc COMMA
@@ -37,9 +37,10 @@ SymbolTable *sym_table = SymbolTable::getSymTable();
 %left RPAREN
 %left SC
 %nonassoc ELSE
+%nonassoc END
 
 %%
-Program : Funcs {sym_table->isMainExist(); sym_table->closeScope();}
+Program : Funcs END {sym_table->isMainExist(); sym_table->closeScope(); exit(0);}
 Funcs : /* Epsilon */
         | FuncDecl Funcs
 FuncDecl : RetType ID LPAREN Formals {
@@ -57,7 +58,19 @@ FuncDecl : RetType ID LPAREN Formals {
             $$ = new FuncDecl_c(ret_type->type , formals->decls, id->name);
             sym_table->addFunction(sym_table->tables.top(), id->name, ret_type->type, NO_OFFSET);
             sym_table->function_name_scope= id->name;
-            sym_table->addFunctionParams(formals->decls);
+            int offset = -1;
+            int keep_offset = sym_table->offsets.top();
+            for (auto & param : formals->decls) {
+                if (sym_table->isAlreadyDecInScope(param->name)) {
+                    errorDef(yylineno, param->name);
+                    exit(1);
+                }
+                sym_table->addFunctionParam(*param, offset);
+                offset--;
+            }
+            sym_table->offsets.pop();
+            sym_table->offsets.push(keep_offset);
+            //sym_table->addFunctionParams(formals->decls);
         } RPAREN LBRACE Statements RBRACE {sym_table->function_name_scope= "";sym_table->closeScope();}
 RetType : Type {Type_c* type = (Type_c*)$1;
                 $$ = new RetType_c(type->type);}
@@ -127,7 +140,7 @@ Statement : LBRACE ScopeOpen Statements RBRACE {
                     exit(1);
                 }
                 //cout<<"gilad the king!! "<<id->name<<endl;
-                //cout<<"the offest is"<<sym_table->offsets.top()<<endl;
+                //cout<<"the offest is "<<sym_table->offsets.top()<<endl;
                 sym_table->insert(sym_table->tables.top(), id->name, type->type, sym_table->offsets.top() + 1);
                 id->type = type->type;
                 //TODO: need something for the statement?
@@ -253,8 +266,8 @@ Exp : LPAREN Exp RPAREN {
         Exp_c* exp1 = (Exp_c*)$1;
         Exp_c* exp2 = (Exp_c*)$4;
         Exp_c* exp3 = (Exp_c*)$7;
-        //cout<<"my name is mor "<<endl;
-        if(checkBoolExp(*exp2) && checkSameTypeExp(*exp1, *exp3) == None_t)
+
+        if((!checkBoolExp(*exp2)) || checkSameTypeExp(*exp1, *exp3) == None_t)
         {
             errorMismatch(yylineno);
             exit(1);
@@ -267,6 +280,7 @@ Exp : LPAREN Exp RPAREN {
             $$ = new Exp_c(checkSameTypeExp(*exp1, *exp3));         
         }
     }
+    %prec IF
     | Exp PLUS_MINUS Exp
     {
         Exp_c* exp1 = (Exp_c*)$1;
@@ -293,6 +307,7 @@ Exp : LPAREN Exp RPAREN {
                         exit(1);
                 }
                 $$ = new Exp_c(sym_table->getTypeByName(id->name));}
+                //std::cout << "Exp is " << id->name << endl;
     | Call
     {
         Call_c* call = (Call_c*)$1;
@@ -359,8 +374,8 @@ Exp : LPAREN Exp RPAREN {
             exit(1);
 
         }
-        else
-           $$ = new Exp_c(Bool_t);
+        else{
+           $$ = new Exp_c(Bool_t);}
     }
     | Exp EQUAL_RELOP Exp
     {
@@ -372,8 +387,8 @@ Exp : LPAREN Exp RPAREN {
             exit(1);
 
         }
-        else
-           $$ = new Exp_c(Bool_t);
+        else {
+           $$ = new Exp_c(Bool_t);}
     }
     | LPAREN Type RPAREN Exp
     {

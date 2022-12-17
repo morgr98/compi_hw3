@@ -78,6 +78,7 @@ b return  B;
 {num} {Num_c* num = new Num_c(yytext); yylval = (Node*)num; return NUM;}
 {id} {ID_c* id = new ID_c(yytext); yylval = (Node*)id; return ID;}
 {string} return STRING;
+<<EOF>> return END;
 {comment}
 {whitespace}
 

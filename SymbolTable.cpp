@@ -43,8 +43,8 @@ void SymbolTable::closeScope() {
         else{
             output::printID(entry->name, 0, output::makeFunctionType(typeToString(entry->type),  entry->argtypes));
         }
+        this->offsets.pop();
     }
-    this->offsets.pop();
     this->tables.pop();
 }
 
@@ -57,17 +57,19 @@ Table* SymbolTable::makeTable(Table* parent, bool iswhile) {
 void SymbolTable::insert(Table *table, const std::string& name, type_enum type, int offset, bool isfunc) {
     //If symbol at the top is a funciton, then offset should be 0.
     //TODO: make sure is ok
-    //if (!isfunc && offset > 0 && this->isFirstInCurScope(table)) {
-        //offset--;
-        //}
+    if (!isfunc && offset > 0 && this->isFirstNoneParamInCurScope(table)) {
+        //std::cout << name << "offset before - is " << offset << endl;
+        offset--;
+        }
     //std::cout << "Inserting: " << name << " type: " << type << " offset: " << offset << " is func:" << isfunc <<endl;
     TableEntry *new_entry = new TableEntry(name, type, offset, isfunc);
     table->insert(new_entry);
     this->offsets.push(offset);
 }
 
-bool SymbolTable::isFirstInCurScope(Table* table) {
-    if (table->entry_list.empty() && table->parent !=nullptr && !table->parent->entry_list.empty()) //&& table->parent->entry_list.back()->isfunction == true)
+bool SymbolTable::isFirstNoneParamInCurScope(Table* table) {
+    //if (not global && not mekoonan && (empty or just params above it)
+    if (table->parent !=nullptr && table->parent->parent == nullptr && (table->entry_list.empty() || table->entry_list.back()->offset < 0))
         return true;
     return false;
 }
@@ -78,7 +80,7 @@ void SymbolTable::addFunction(Table *table, const std::string& name, type_enum t
     table->parent->insert(new_entry);
 }
 
-void SymbolTable::addFunctionParams(const std::vector<FormalDecl_c*>& decls) {
+/*void SymbolTable::addFunctionParams(const std::vector<FormalDecl_c*>& decls) {
     int offset = -1;
     int keep_offset = this->offsets.top();
     // while entering function params, the top of the parent table is the symbol of the funciton itself
@@ -90,6 +92,13 @@ void SymbolTable::addFunctionParams(const std::vector<FormalDecl_c*>& decls) {
     }
     this->offsets.pop();
     this->offsets.push(keep_offset);
+}*/
+
+void SymbolTable::addFunctionParam(const FormalDecl_c& decl, int offset) {
+    // while entering function params, the top of the parent table is the symbol of the funciton itself
+    TableEntry *function_sym = this->tables.top()->parent->entry_list.back();
+    this->insert(this->tables.top(), decl.name, decl.type, offset);
+    function_sym->argtypes.push_back(typeToString(decl.type));
 }
 
 bool SymbolTable::compareByteInt(std::string type1, std::string type2)
@@ -205,7 +214,7 @@ bool SymbolTable::isAlreadyDecInScope(const std::string& name) {
     //cout<<"the size of is "<<curr_table->entry_list.size()<<endl;
     while (curr_table != nullptr) {
         for (auto & entry : curr_table->entry_list) {
-         //  cout<<"the name is "<<entry->name<<endl;
+            //cout<<"the compared name is "<<entry->name<<endl;
             if (entry->name == name) {
                 found = true;
                 break;
@@ -215,6 +224,14 @@ bool SymbolTable::isAlreadyDecInScope(const std::string& name) {
     }   
     return found;
 }
+
+/*bool SymbolTable::areParamsAlreadyDecInScope(const std::vector<FormalDecl_c*>& decls) {
+    for (auto & param : decls) {
+        if (isAlreadyDecInScope(param->name))
+            return true;
+    }
+    return false;
+}*/
 
 bool SymbolTable::isFunctionAlreadyDecInScope(const std::string& name) {
     Table* curr_table = this->tables.top()->parent;
